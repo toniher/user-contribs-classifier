@@ -1,0 +1,8 @@
+{
+	"require": {
+		"addwiki/mediawiki-api-base": "2.4.*",
+		"addwiki/wikibase-api": "0.7.*",
+		"data-values/geo": "1.1.*",
+		"data-values/time": "0.8.*"
+    	}
+}

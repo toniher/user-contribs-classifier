@@ -1,0 +1,26 @@
+{
+	"wikipedia": {
+		"url": "https://ca.wikipedia.org/w/api.php",
+		"user": "xxx",
+		"password": "xxx"
+	},
+	"wikidata": {
+		"url": "https://www.wikidata.org/w/api.php",
+		"user": "Catabot",
+		"password": "xxx"
+	},
+	"tasks": {
+		"genderbios": {
+			"lang": "ca",
+			"startdate": "2018-01-01",
+			"enddate": "2018-12-31",
+			"filter": [
+				{
+					"prop": "P31",
+					"propValue": "Q5"
+				}
+			],
+			"retrieve": [ "P21" ]
+		}
+	}
+}
