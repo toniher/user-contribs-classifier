@@ -7,6 +7,8 @@ use \Wikibase\Api as WbApi;
 use \Mediawiki\DataModel as MwDM;
 use \Wikibase\DataModel as WbDM;
 
+use \BorderCloud\SPARQL\SparqlClient;
+
 // Detect commandline args
 $conffile = 'config.json';
 $username = null;
@@ -84,8 +86,11 @@ $pages = retrieveWpQuery( $pages, $wpapi, $params, null );
 $retrieve = retrieveQsFromWp( $pages, $wpapi );
 
 // querywd
+$endpoint = "https://query.wikidata.org/sparql";
+$sc = new SparqlClient();
+$sc->setEndpointRead($endpoint);
 
-$querywd = retrievePropsFromWd( $retrieve );
+$querywd = retrievePropsFromWd( $retrieve, $sc );
 
 var_dump( $pages );
 var_dump( $retrieve );
@@ -263,7 +268,7 @@ function retrieveWikidataId( $retrieve, $titles, $wpapi ){
 	
 }
 
-function retrievePropsFromWd( $retrieve ) {
+function retrievePropsFromWd( $retrieve, $sc ) {
 	
 	$batch = 50;
 	$count = 0;
