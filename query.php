@@ -73,7 +73,22 @@ $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
 $params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => 500 );
 
+if ( array_key_exists( "namespace", $props ) ) {
+	$params["ucnamespace"] = $props["namespace"];
+}
+
+// Get pages of user
 $pages = retrieveWpQuery( $pages, $wpapi, $params, null );
+
+// Get Qs of pages
+$retrieve = retrieveQsFromWp( $pages, $wpapi );
+
+// querywd
+
+$querywd = retrievePropsFromWd( $retrieve );
+
+var_dump( $pages );
+var_dump( $retrieve );
 
 $wpapi->logout();
 
@@ -106,21 +121,28 @@ function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue ) {
 	
 	$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 
-	$contribs = $wpapi->postRequest( $userContribRequest );
+	$outcome = $wpapi->postRequest( $userContribRequest );
 
 	$uccontinue = null;
 	
-	if ( array_key_exists( "continue", $contribs ) ) {
+	if ( array_key_exists( "continue", $outcome ) ) {
 		
-		if ( array_key_exists( "uccontinue", $contribs["continue"] ) ) {
+		if ( array_key_exists( "uccontinue", $outcome["continue"] ) ) {
 			
-			$uccontinue = $contribs["continue"]["uccontinue"];
+			$uccontinue = $outcome["continue"]["uccontinue"];
 		} 
 	} 
 	
-	$pages = processPages( $pages, $contribs );
+	if ( array_key_exists( "query", $outcome ) ) {
 	
+		if ( array_key_exists( "usercontribs", $outcome["query"] ) ) {
 
+			$pages = processPages( $pages, $outcome["query"]["usercontribs"] );
+	
+		}
+	
+	}
+	
 	if ( $uccontinue ) {
 		$pages = retrieveWpQuery( $pages, $wpapi, $params, $uccontinue );
 	}
@@ -131,6 +153,168 @@ function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue ) {
 
 function processPages( $pages, $contribs ) {
 	
+	foreach ( $contribs as $contrib ) {
+		
+		$title = $contrib["title"];
+		$timestamp = $contrib["timestamp"];
+	
+		$struct = array( "timestamp" => $timestamp );
+		
+		if ( array_key_exists( $title, $pages ) ) {
+			
+			$prets = $pages[$title]["timestamp"];
+			
+			if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+				
+				$pages[$title]["timestamp"] = $prets;
+			}
+			
+			
+		} else {
+			
+			$pages[ $title ] = $struct;
+		}
+		
+	}
 	return $pages;
+}
+
+function retrieveQsFromWp( $pages, $wpapi ){
+	
+	$batch = 50;
+	$count = 0;
+	$titles = array();
+	$retrieve = array();
+	$retrieve["pagesQ"] = array();
+	$retrieve["redirects"] = array();
+	
+	foreach( $pages as $page => $struct ) {
+		
+		$count++;
+		
+		if ( $count < $batch ) {
+			array_push( $titles, $page );
+		} else {
+			
+			$retrieve = retrieveWikidataId( $retrieve, $titles, $wpapi );
+			
+			$count = 0;
+			$titles = array( );
+			array_push( $titles, $page );
+
+		}
+		
+	}
+			
+	if ( count( $titles ) > 0 ) {
+		
+		$retrieve = retrieveWikidataId( $retrieve, $titles, $wpapi );
+
+	}
+	
+	return $retrieve;
+}
+
+function retrieveWikidataId( $retrieve, $titles, $wpapi ){
+
+	$titlesStr = implode( "|", $titles );
+	#$titlesStr = str_replace( " ", "_", $titlesStr );
+	
+	// Below for main WikiData ID
+	$params = array( "titles" => $titlesStr, "prop" => "pageprops", "ppprop" => "wikibase_item", "redirects" => "true" );
+	
+	$listQsRequest = new Mwapi\SimpleRequest( 'query', $params  );
+
+	$outcome = $wpapi->postRequest( $listQsRequest );
+	
+	if ( array_key_exists( "query", $outcome ) ) {
+		
+		if ( array_key_exists( "redirects", $outcome["query"] ) ) {
+			
+			foreach ( $outcome["query"]["redirects"] as $redirect ) {
+				
+				$retrieve["redirects"][ $redirect["from"] ] = $redirect["to"];
+				
+			}
+			
+		}
+		
+		if ( array_key_exists( "pages", $outcome["query"] ) ) {
+						
+			foreach ( $outcome["query"]["pages"] as $id => $qentry ) {
+				
+				if ( array_key_exists( "pageprops", $qentry ) ) {
+					
+					if ( array_key_exists( "wikibase_item", $qentry["pageprops"] ) ) {
+
+						if ( count( $qentry["pageprops"]["wikibase_item"] ) > 0 ) {
+							
+							$retrieve["pagesQ"][$qentry["title"]] = $qentry["pageprops"]["wikibase_item"];
+							
+						}
+					}
+				}
+			}
+			
+		}
+	}
+	
+	return $retrieve;
+	
+}
+
+function retrievePropsFromWd( $retrieve ) {
+	
+	$batch = 50;
+	$count = 0;
+	$qentries = array();
+	$queryResult = array();
+	
+	foreach( $retrieve["pagesQ"] as $page => $qentry ) {
+		
+		$count++;
+		
+		if ( $count < $batch ) {
+			array_push( $qentries, $qentry );
+		} else {
+			
+			$queryResult = retrievePropsWd( $queryResult, $qentries );
+			
+			$count = 0;
+			$qentries = array( );
+			array_push( $qentries, $qentry );
+
+		}
+		
+	}
+			
+	if ( count( $qentries ) > 0 ) {
+		
+		$queryResult = retrievePropsWd( $queryResult, $qentries );
+
+	}
+	
+	return $queryResult;
+	
+}
+
+function retrievePropsWd( $queryResult, $qentries ) {
+	
+
+	
+//	
+//	SELECT ?entry ?genderLabel
+//WHERE
+//{
+//	?entry wdt:P31 wd:Q5 .       #find humans
+//    ?entry wdt:P21 ?gender .
+//  
+//  FILTER (?entry IN ( wd:Q45735407 ) )
+//  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],ca" }
+//}
+//
+
+	return $queryResult;
+	
 }
 

@@ -13,6 +13,7 @@
 		"genderbios": {
 			"startdate": "2018-01-01",
 			"enddate": "2018-12-31",
+			"namespace": 0,
 			"filter": [
 				{
 					"prop": "P31",
