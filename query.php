@@ -7,8 +7,6 @@ use \Wikibase\Api as WbApi;
 use \Mediawiki\DataModel as MwDM;
 use \Wikibase\DataModel as WbDM;
 
-use \BorderCloud\SPARQL\SparqlClient;
-
 // Detect commandline args
 $conffile = 'config.json';
 $username = null;
@@ -85,35 +83,14 @@ $pages = retrieveWpQuery( $pages, $wpapi, $params, null );
 // Get Qs of pages
 $retrieve = retrieveQsFromWp( $pages, $wpapi );
 
-// querywd
-$endpoint = "https://query.wikidata.org/sparql";
-$sc = new SparqlClient();
-$sc->setEndpointRead($endpoint);
-
-$querywd = retrievePropsFromWd( $retrieve, $sc );
-
 var_dump( $pages );
 var_dump( $retrieve );
 
 $wpapi->logout();
 
-$wdapi = new MwApi\MediawikiApi( $wikidataconfig['url'] );
+$wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
 
-$dataValueClasses = array(
-    'unknown' => 'DataValues\UnknownValue',
-    'string' => 'DataValues\StringValue',
-    'boolean' => 'DataValues\BooleanValue',
-    'number' => 'DataValues\NumberValue',
-    'time' => 'DataValues\TimeValue',
-    'globecoordinate' => 'DataValues\Geo\Values\GlobeCoordinateValue',
-    'wikibase-entityid' => 'Wikibase\DataModel\Entity\EntityIdValue',
-);
-
-$wbFactory = new WbApi\WikibaseFactory(
-    $wdapi,
-    new DataValues\Deserializers\DataValueDeserializer( $dataValueClasses ),
-    new DataValues\Serializers\DataValueSerializer()
-);
+$result = retrievePropsFromWd( $retrieve, $wdapi );
 
 $wdapi->logout();
 
@@ -268,7 +245,7 @@ function retrieveWikidataId( $retrieve, $titles, $wpapi ){
 	
 }
 
-function retrievePropsFromWd( $retrieve, $sc ) {
+function retrievePropsFromWd( $retrieve, $wdapi ) {
 	
 	$batch = 50;
 	$count = 0;
@@ -283,7 +260,7 @@ function retrievePropsFromWd( $retrieve, $sc ) {
 			array_push( $qentries, $qentry );
 		} else {
 			
-			$queryResult = retrievePropsWd( $queryResult, $qentries );
+			$queryResult = retrievePropsWd( $queryResult, $qentries, $wdapi );
 			
 			$count = 0;
 			$qentries = array( );
@@ -295,7 +272,7 @@ function retrievePropsFromWd( $retrieve, $sc ) {
 			
 	if ( count( $qentries ) > 0 ) {
 		
-		$queryResult = retrievePropsWd( $queryResult, $qentries );
+		$queryResult = retrievePropsWd( $queryResult, $qentries, $wdapi );
 
 	}
 	
@@ -303,21 +280,19 @@ function retrievePropsFromWd( $retrieve, $sc ) {
 	
 }
 
-function retrievePropsWd( $queryResult, $qentries ) {
+function retrievePropsWd( $queryResult, $qentries, $wdapi ) {
 	
+	$qentriesStr = implode( "|", $qentries );
 
+		
+	// Below for main WikiData ID
+	$params = array( "ids" => $qentriesStr, "props" => "claims" );
 	
-//	
-//	SELECT ?entry ?genderLabel
-//WHERE
-//{
-//	?entry wdt:P31 wd:Q5 .       #find humans
-//    ?entry wdt:P21 ?gender .
-//  
-//  FILTER (?entry IN ( wd:Q45735407 ) )
-//  SERVICE wikibase:label { bd:serviceParam wikibase:language "[AUTO_LANGUAGE],ca" }
-//}
-//
+	$listEntities = new Mwapi\SimpleRequest( 'wbgetentities', $params  );
+
+	$outcome = $wdapi->postRequest( $listEntities );
+	
+	var_dump( $outcome );
 
 	return $queryResult;
 	
