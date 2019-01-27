@@ -83,16 +83,15 @@ $pages = retrieveWpQuery( $pages, $wpapi, $params, null );
 // Get Qs of pages
 $retrieve = retrieveQsFromWp( $pages, $wpapi );
 
-var_dump( $pages );
-var_dump( $retrieve );
-
 $wpapi->logout();
 
 $wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
 
-$result = retrievePropsFromWd( $retrieve, $wdapi );
+$result = retrievePropsFromWd( $retrieve, $props, $wdapi );
 
 $wdapi->logout();
+
+printAll( $pages, $retrieve, $result, $props );
 
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue ) {
@@ -137,19 +136,24 @@ function processPages( $pages, $contribs ) {
 	
 	foreach ( $contribs as $contrib ) {
 		
-		$title = $contrib["title"];
+		$title = strval( $contrib["title"] );
 		$timestamp = $contrib["timestamp"];
+		$size = intval( $contrib["size"] );
 	
-		$struct = array( "timestamp" => $timestamp );
+		$struct = array( "timestamp" => $timestamp, "size" => $size );
 		
 		if ( array_key_exists( $title, $pages ) ) {
 			
 			$prets = $pages[$title]["timestamp"];
+			$presize = $pages[$title]["size"];
 			
 			if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
 				
 				$pages[$title]["timestamp"] = $prets;
 			}
+			
+			$pages[$title]["size"] = $presize + $size;
+			
 			
 			
 		} else {
@@ -245,7 +249,7 @@ function retrieveWikidataId( $retrieve, $titles, $wpapi ){
 	
 }
 
-function retrievePropsFromWd( $retrieve, $wdapi ) {
+function retrievePropsFromWd( $retrieve, $props, $wdapi ) {
 	
 	$batch = 50;
 	$count = 0;
@@ -260,7 +264,7 @@ function retrievePropsFromWd( $retrieve, $wdapi ) {
 			array_push( $qentries, $qentry );
 		} else {
 			
-			$queryResult = retrievePropsWd( $queryResult, $qentries, $wdapi );
+			$queryResult = retrievePropsWd( $queryResult, $qentries, $props, $wdapi );
 			
 			$count = 0;
 			$qentries = array( );
@@ -272,7 +276,7 @@ function retrievePropsFromWd( $retrieve, $wdapi ) {
 			
 	if ( count( $qentries ) > 0 ) {
 		
-		$queryResult = retrievePropsWd( $queryResult, $qentries, $wdapi );
+		$queryResult = retrievePropsWd( $queryResult, $qentries, $props, $wdapi );
 
 	}
 	
@@ -280,11 +284,10 @@ function retrievePropsFromWd( $retrieve, $wdapi ) {
 	
 }
 
-function retrievePropsWd( $queryResult, $qentries, $wdapi ) {
+function retrievePropsWd( $queryResult, $qentries, $props, $wdapi ) {
 	
 	$qentriesStr = implode( "|", $qentries );
 
-		
 	// Below for main WikiData ID
 	$params = array( "ids" => $qentriesStr, "props" => "claims" );
 	
@@ -292,9 +295,200 @@ function retrievePropsWd( $queryResult, $qentries, $wdapi ) {
 
 	$outcome = $wdapi->postRequest( $listEntities );
 	
-	var_dump( $outcome );
+	$filter = null;
+	$filterProps = array( );
+	$retrieve = null;
+	
+	if ( array_key_exists( "filter", $props ) ) {
+		$filter = $props["filter"];
+
+		foreach( $filter as $filterEntry ) {
+			
+			if ( array_key_exists( "prop", $filterEntry ) ) {
+				$filterProps[ $filterEntry["prop"] ] = null;
+				
+				if ( array_key_exists( "propValue", $filterEntry ) ) {
+					$filterProps[ $filterEntry["prop"] ] = $filterEntry["propValue"];
+				}
+			}
+		}
+	}
+	
+	if ( array_key_exists( "retrieve", $props ) ) {
+		$retrieve = $props["retrieve"];
+	}
+	
+	if ( array_key_exists( "entities", $outcome	) ) {
+		
+		
+		foreach ( $outcome["entities"] as $entity => $struct ) {
+			
+			$in = 0;
+			$retrieved = array( );
+			
+			if ( array_key_exists( "claims", $struct ) ) {
+								
+				foreach ( $struct["claims"] as $claimProp => $claimStruct ) {
+					
+					
+					if ( in_array( $claimProp, $retrieve ) ) {
+						$retrieved[ $claimProp ] = getValueSnaks( $claimStruct );
+						
+					}
+					
+					if ( array_key_exists( $claimProp, $filterProps ) ) {
+						
+						if ( ! $filterProps[ $claimProp ] ) {
+							$in = 1;
+						} else {
+							if ( compareValueSnaks( $filterProps[ $claimProp ], $claimStruct ) ) {
+								
+								$in = 1;
+							}
+						}
+						
+					}
+					
+				}
+				
+			}
+			
+			
+			if ( $in > 0 ) {
+				
+
+				if ( count( array_keys( $retrieved ) ) >  0 ) {
+
+					$queryResult[ $entity ] = $retrieved;
+					
+				}
+				
+			}
+			
+		}
+		
+	}
 
 	return $queryResult;
+	
+}
+
+function getValueSnaks( $claimStruct ) {
+	
+	$values = array();
+	
+	foreach ( $claimStruct as $struct ) {
+		
+		if ( array_key_exists( "mainsnak", $struct ) ) {
+			
+			$mainsnak = $struct["mainsnak"];
+			
+			if ( array_key_exists( "datavalue", $mainsnak ) ) {
+				
+				array_push( $values, processDataValue( $mainsnak["datavalue"] ) );
+				
+			}
+			
+		}
+	}
+	
+	return $values;
+}
+
+function compareValueSnaks(  $value, $claimStruct ) {
+	
+	$values = array();
+	
+	foreach ( $claimStruct as $struct ) {
+		
+		if ( array_key_exists( "mainsnak", $struct ) ) {
+			
+			$mainsnak = $struct["mainsnak"];
+			
+			if ( array_key_exists( "datavalue", $mainsnak ) ) {
+				
+				array_push( $values, processDataValue( $mainsnak["datavalue"] ) );
+				
+			}
+			
+		}
+	}
+	
+	if ( in_array( $value, $values ) ) {
+		return true;
+	} else {
+		return false;
+	}
+	
+}
+
+function processDataValue( $datavalue ) {
+	
+	$type = $datavalue["type"];
+	$value = null;
+	
+	switch( $type ) {
+		
+		// TODO: More to include
+		case "wikibase-entityid" :
+			$value = $datavalue["value"]["id"];
+			break;
+		case "time":
+			$value = $datavalue["value"]["time"];
+			break;
+		default:
+			if ( array_key_exists( "value", $datavalue ) ) {
+				$value = $datavalue["value"];
+			}
+	}
+	
+	return $value;
+	
+}
+
+function printAll( $pages, $retrieve, $result, $props ) {
+	
+	echo "Page\t".implode( "\t", $props["retrieve"] )."\n";
+
+	foreach ( $pages as $page => $struct ) {
+		
+		$print = 0;
+		
+		if ( array_key_exists( $page, $retrieve["pagesQ"] ) ) {
+			
+			$qid = $retrieve["pagesQ"][$page];
+
+			
+			$vals = array( );
+			if ( array_key_exists( $qid, $result ) ) {
+
+				$print = 1;
+				
+				$Qprops = $result[ $qid ];
+				
+				foreach ( $props["retrieve"] as $prop ) {
+					
+					$toadd = "";
+					
+					if ( array_key_exists( $prop, $Qprops ) ) {
+						$toadd = implode( ",", $Qprops[ $prop ] );
+					}
+					
+					array_push( $vals, $toadd );
+					
+				}
+				
+			}
+			
+			if ( $print > 0 ) {
+			
+				echo $page."\t".implode( "\t", $vals ), "\n";
+
+			}
+		}
+		
+		
+	}
 	
 }
 
