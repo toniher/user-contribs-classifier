@@ -20,7 +20,9 @@
 					"propValue": "Q5"
 				}
 			],
-			"retrieve": [ "P21" ]
+			"retrieve": [ "P21" ],
+			"newonly": false,
+			"size": 50
 		}
 	}
 }

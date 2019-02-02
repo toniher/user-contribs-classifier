@@ -77,8 +77,16 @@ if ( array_key_exists( "namespace", $props ) ) {
 	$params["ucnamespace"] = $props["namespace"];
 }
 
+if ( array_key_exists( "newonly", $props ) ) {
+	
+	if ( $props["newonly"] ) {
+		$params["ucshow"] = "new";
+	}
+	
+}
+
 // Get pages of user
-$pages = retrieveWpQuery( $pages, $wpapi, $params, null );
+$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 
 // Get Qs of pages
 $retrieve = retrieveQsFromWp( $pages, $wpapi );
@@ -94,7 +102,7 @@ $wdapi->logout();
 printAll( $pages, $retrieve, $result, $props );
 
 
-function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue ) {
+function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
 	
 	if ( $uccontinue ) {
 		$params["uccontinue"] = $uccontinue;
@@ -118,21 +126,21 @@ function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue ) {
 	
 		if ( array_key_exists( "usercontribs", $outcome["query"] ) ) {
 
-			$pages = processPages( $pages, $outcome["query"]["usercontribs"] );
+			$pages = processPages( $pages, $outcome["query"]["usercontribs"], $props );
 	
 		}
 	
 	}
 	
 	if ( $uccontinue ) {
-		$pages = retrieveWpQuery( $pages, $wpapi, $params, $uccontinue );
+		$pages = retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props );
 	}
 	
 	return $pages;
 	
 }
 
-function processPages( $pages, $contribs ) {
+function processPages( $pages, $contribs, $props ) {
 	
 	foreach ( $contribs as $contrib ) {
 		
@@ -142,27 +150,62 @@ function processPages( $pages, $contribs ) {
 	
 		$struct = array( "timestamp" => $timestamp, "size" => $size );
 		
-		if ( array_key_exists( $title, $pages ) ) {
-			
-			$prets = $pages[$title]["timestamp"];
-			$presize = $pages[$title]["size"];
-			
-			if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+		$timeCompare = compareTime( $timestamp, $props );
+		
+		if ( $timeCompare ) {
+		
+			if ( array_key_exists( $title, $pages ) ) {
 				
-				$pages[$title]["timestamp"] = $prets;
+				$prets = $pages[$title]["timestamp"];
+				$presize = $pages[$title]["size"];
+				
+				if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+					
+					$pages[$title]["timestamp"] = $prets;
+				}
+				
+				$pages[$title]["size"] = $presize + $size;
+				
+				
+				
+			} else {
+				
+				$pages[ $title ] = $struct;
 			}
-			
-			$pages[$title]["size"] = $presize + $size;
-			
-			
-			
-		} else {
-			
-			$pages[ $title ] = $struct;
+		
 		}
 		
 	}
 	return $pages;
+}
+
+function compareTime( $timestamp, $props ) {
+	
+	$inInterval = true;
+	
+	$timestampTime = strtotime( $timestamp );
+	
+	$startdateTime = null;
+	$enddateTime = null;
+
+	if ( array_key_exists( "startdate", $props ) ) {
+		$startdateTime = strtotime( $props["startdate"] );
+	}
+	
+	if ( array_key_exists( "enddate", $props ) ) {
+		$enddateTime = strtotime( $props["enddate"] );
+	}
+	
+	if ( $startdateTime && ( $timestampTime < $startdateTime ) ) {
+		$inInterval = false;
+	}
+	
+	if ( $enddateTime && ( $timestampTime > $enddateTime ) ) {
+		$inInterval = false;
+	}
+	
+	return $inInterval;
+	
 }
 
 function retrieveQsFromWp( $pages, $wpapi ){
@@ -453,6 +496,15 @@ function printAll( $pages, $retrieve, $result, $props ) {
 	foreach ( $pages as $page => $struct ) {
 		
 		$print = 0;
+		if ( array_key_exists( "size", $props ) ) {
+			
+			if ( $struct["size"] < $props["size"] ) {
+				
+				# If smaller size, avoid
+				continue;
+			}
+			
+		}
 		
 		if ( array_key_exists( $page, $retrieve["pagesQ"] ) ) {
 			
