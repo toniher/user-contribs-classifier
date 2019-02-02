@@ -79,7 +79,7 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 
 }
 
-$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => 500 );
+$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => 500, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
 
 if ( array_key_exists( "namespace", $props ) ) {
 	$params["ucnamespace"] = $props["namespace"];
@@ -161,7 +161,7 @@ function processPages( $pages, $contribs, $props ) {
 		
 		$title = strval( $contrib["title"] );
 		$timestamp = $contrib["timestamp"];
-		$size = intval( $contrib["size"] );
+		$size = intval( $contrib["sizediff"] );
 	
 		$struct = array( "timestamp" => $timestamp, "size" => $size );
 		
@@ -506,7 +506,7 @@ function processDataValue( $datavalue ) {
 
 function printAll( $pages, $retrieve, $result, $props ) {
 	
-	echo "Page\t".implode( "\t", $props["retrieve"] )."\n";
+	echo "Page\tSize\t".implode( "\t", $props["retrieve"] )."\n";
 
 	foreach ( $pages as $page => $struct ) {
 		
@@ -549,7 +549,7 @@ function printAll( $pages, $retrieve, $result, $props ) {
 			
 			if ( $print > 0 ) {
 			
-				echo $page."\t".implode( "\t", $vals ), "\n";
+				echo $page."\t".$struct["size"]."\t".implode( "\t", $vals ), "\n";
 
 			}
 		}
