@@ -3,6 +3,7 @@
 require_once( __DIR__ . '/vendor/autoload.php' );
 
 use \Mediawiki\Api as MwApi;
+use \Mediawiki\Api\ApiUser;
 use \Wikibase\Api as WbApi;
 use \Mediawiki\DataModel as MwDM;
 use \Wikibase\DataModel as WbDM;
@@ -71,6 +72,13 @@ $pages = array( );
 
 $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
+// Login
+if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $wikiconfig ) ) {
+	
+	$wpapi->login( new ApiUser( $wikiconfig["user"], $wikiconfig["password"] ) );
+
+}
+
 $params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => 500 );
 
 if ( array_key_exists( "namespace", $props ) ) {
@@ -94,6 +102,13 @@ $retrieve = retrieveQsFromWp( $pages, $wpapi );
 $wpapi->logout();
 
 $wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
+
+// Login
+if ( array_key_exists( "user", $wikidataconfig ) && array_key_exists( "password", $wikidataconfig ) ) {
+	
+	$wdapi->login( new ApiUser( $wikidataconfig["user"], $wikidataconfig["password"] ) );
+
+}
 
 $result = retrievePropsFromWd( $retrieve, $props, $wdapi );
 
