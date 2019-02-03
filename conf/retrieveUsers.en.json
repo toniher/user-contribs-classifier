@@ -1,0 +1,8 @@
+{
+	"wikipedia": {
+		"url": "https://en.wikipedia.org/w/api.php"
+	},
+	"list": "Wikipedia:List_of_Wikipedians_by_number_of_edits/1–1000",
+	"regex": "\/\\|\\s\\[\\[U\\w+\\:(\\w.*?)\\|\/"
+
+}
