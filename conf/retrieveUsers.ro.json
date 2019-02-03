@@ -1,0 +1,8 @@
+{
+	"wikipedia": {
+		"url": "https://ro.wikipedia.org/w/api.php"
+	},
+	"list": "Wikipedia:Lista_wikipediștilor_după_numărul_de_editări",
+	"regex": "\/\\|\\s\\[\\[U\\w+\\:(\\w.*?)\\|\/"
+
+}

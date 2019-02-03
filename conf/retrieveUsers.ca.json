@@ -1,0 +1,7 @@
+{
+	"wikipedia": {
+		"url": "https://ca.wikipedia.org/w/api.php"
+	},
+	"list": "Viquipèdia:Llista_de_viquipedistes_per_nombre_d'edicions",
+	"regex": "\/\\s*\\|\\s*\\d+\\s*\\|\\|\\s\\[\\[U\\w+\\:(\\w.*?)\\|\/"
+}

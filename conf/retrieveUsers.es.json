@@ -1,0 +1,7 @@
+{
+	"wikipedia": {
+		"url": "https://es.wikipedia.org/w/api.php"
+	},
+	"list": "Wikipedia:Ranking_de_ediciones",
+	"regex": "\/\\s*\\|\\s*\\d+\\s*\\|\\|\\s\\[\\[U\\w+\\:(\\w.*?)\\|\/"
+}
