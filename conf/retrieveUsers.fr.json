@@ -1,0 +1,8 @@
+{
+	"wikipedia": {
+		"url": "https://fr.wikipedia.org/w/api.php"
+	},
+	"list": "Wikipédia:Wikipédiens_par_nombre_d'éditions",
+	"section": 2,
+	"regex": "\/\\#\\s\\[\\[U\\w+\\:(\\w.*?)\\|\/"
+}

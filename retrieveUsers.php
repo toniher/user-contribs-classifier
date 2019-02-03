@@ -37,11 +37,17 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 if ( array_key_exists( "list", $confjson ) && array_key_exists( "regex", $confjson ) ) {
 	
 	$params = array( "titles" => $confjson["list"], "prop" => "revisions", "rvlimit" => 1, "rvprop" => "content" );
+	
+	if ( array_key_exists( "section", $confjson ) ) {
+		$params["rvsection"] = $confjson["section"];
+		$params["rvslots"] = "*";
+	}
+	
 	$listPage = new Mwapi\SimpleRequest( 'query', $params  );
 	$outcome = $wpapi->postRequest( $listPage );
 
 	$text = getWikiText( $outcome );
-	
+
 	// TODO: This may be adapted to other pages
 	$users = getUsers( $text, $confjson["regex"] );
 
@@ -66,6 +72,14 @@ function getWikiText( $outcome ) {
 						if ( array_key_exists( "*", $rev ) ) {
 							
 							$text = $rev["*"];
+						} else {
+							
+							if ( array_key_exists( "slots", $rev ) ) {
+
+								// Let's assume main
+								$text = $rev["slots"]["main"]["*"];
+							}
+							
 						}
 
 					}
