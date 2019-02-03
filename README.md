@@ -5,4 +5,8 @@ Tool for retrieving reports of users contributions against Wikidata annotation
 
     php query.php myconfigfile.json MyUser taskname
 
+# TODO
+
+* Script for parsing CSV
+* Lumen application
 
