@@ -93,6 +93,17 @@ if ( array_key_exists( "newonly", $props ) ) {
 	
 }
 
+if ( array_key_exists( "startdate", $props ) ) {
+	$params["ucstart"] = $props["startdate"];
+	$params["ucdir"] = "newer";
+}
+
+if ( array_key_exists( "enddate", $props ) ) {
+	$params["ucend"]= $props["enddate"];
+	$params["ucdir"] = "newer";
+}
+
+
 // Get pages of user
 $pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 
@@ -165,9 +176,9 @@ function processPages( $pages, $contribs, $props ) {
 	
 		$struct = array( "timestamp" => $timestamp, "size" => $size );
 		
-		$timeCompare = compareTime( $timestamp, $props );
+		#$timeCompare = compareTime( $timestamp, $props );
 		
-		if ( $timeCompare ) {
+		#if ( $timeCompare ) {
 		
 			if ( array_key_exists( $title, $pages ) ) {
 				
@@ -188,7 +199,7 @@ function processPages( $pages, $contribs, $props ) {
 				$pages[ $title ] = $struct;
 			}
 		
-		}
+		#}
 		
 	}
 	return $pages;

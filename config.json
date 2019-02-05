@@ -11,8 +11,8 @@
 	},
 	"tasks": {
 		"genderbios": {
-			"startdate": "2018-01-01",
-			"enddate": "2018-12-31",
+			"startdate": "2018-01-01T00:00:00Z",
+			"enddate": "2019-01-01T00:00:00Z",
 			"namespace": 0,
 			"filter": [
 				{
