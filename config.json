@@ -22,7 +22,8 @@
 			],
 			"retrieve": [ "P21" ],
 			"newonly": false,
-			"size": 150
+			"size": 150,
+			"skip_startswith": "Rever"
 		}
 	}
 }

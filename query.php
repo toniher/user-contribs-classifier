@@ -176,6 +176,16 @@ function processPages( $pages, $contribs, $props ) {
 	
 		$struct = array( "timestamp" => $timestamp, "size" => $size );
 		
+		# Regex skip comment
+		if ( array_key_exists( "skip_startswith", $props ) ) {
+			
+			if ( startsWith( $contrib["comment"], $props["skip_startswith"] ) ) {
+				continue;
+
+			}
+
+		}
+		
 		#$timeCompare = compareTime( $timestamp, $props );
 		
 		#if ( $timeCompare ) {
@@ -203,6 +213,14 @@ function processPages( $pages, $contribs, $props ) {
 		
 	}
 	return $pages;
+}
+
+
+
+function startsWith($haystack, $needle)
+{
+     $length = strlen($needle);
+     return (substr($haystack, 0, $length) === $needle);
 }
 
 function compareTime( $timestamp, $props ) {
