@@ -72,14 +72,18 @@ $pages = array( );
 
 $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
+$uclimit = 500;
+
 // Login
 if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $wikiconfig ) ) {
 	
 	$wpapi->login( new ApiUser( $wikiconfig["user"], $wikiconfig["password"] ) );
+	// This below assumes you're a bot
+	$uclimit = 1000;
 
 }
 
-$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => 500, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
+$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => $uclimit, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
 
 if ( array_key_exists( "namespace", $props ) ) {
 	$params["ucnamespace"] = $props["namespace"];
@@ -254,7 +258,7 @@ function compareTime( $timestamp, $props ) {
 
 function retrieveQsFromWp( $pages, $wpapi ){
 	
-	$batch = 50;
+	$batch = 100;
 	$count = 0;
 	$titles = array();
 	$retrieve = array();
