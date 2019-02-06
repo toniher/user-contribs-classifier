@@ -3,6 +3,7 @@
 require_once( __DIR__ . '/vendor/autoload.php' );
 
 use \Mediawiki\Api as MwApi;
+use \Mediawiki\Api\ApiUser;
 
 // Detect commandline args
 $conffile = 'config.json';
@@ -62,14 +63,14 @@ function processUserFile( $userfile, $wpapi ){
 		
 		if ( $count >= 50 ) {
 			
-			getUsersGender( $users, $wapi );
+			getUsersGender( $users, $wpapi );
 			$count = 0;
 			$users = array();
 		}
 	
 	}
 	
-	getUsersGender( $users, $wapi );
+	getUsersGender( $users, $wpapi );
 
 }
 
@@ -79,11 +80,12 @@ function getUsersGender( $users, $wpapi ) {
 	$params = array();
 	
 	$params["list"] = "users";
-	
 	$params["ususers"] = $usersStr;
-	$params["usprop"]="gender";
-	
-	$listPage = new Mwapi\SimpleRequest( 'query', $params  );
+	$params["usprop"] = "gender";
+
+	var_dump( $params );
+
+	$listPage = new Mwapi\SimpleRequest( 'query', $params );
 	$outcome = $wpapi->postRequest( $listPage );
 	
 	var_dump( $outcome );
