@@ -175,10 +175,10 @@ function processPages( $pages, $contribs, $props ) {
 	foreach ( $contribs as $contrib ) {
 		
 		$title = strval( $contrib["title"] );
-		$timestamp = $contrib["timestamp"];
+		#$timestamp = $contrib["timestamp"];
 		$size = intval( $contrib["sizediff"] );
 	
-		$struct = array( "timestamp" => $timestamp, "size" => $size );
+		$struct = array( "size" => $size );
 		
 		# Regex skip comment
 		if ( array_key_exists( "skip_startswith", $props ) ) {
@@ -196,13 +196,13 @@ function processPages( $pages, $contribs, $props ) {
 		
 			if ( array_key_exists( $title, $pages ) ) {
 				
-				$prets = $pages[$title]["timestamp"];
+				#$prets = $pages[$title]["timestamp"];
 				$presize = $pages[$title]["size"];
 				
-				if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+				#if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
 					
-					$pages[$title]["timestamp"] = $prets;
-				}
+				#	$pages[$title]["timestamp"] = $prets;
+				#}
 				
 				$pages[$title]["size"] = $presize + $size;
 				
@@ -258,7 +258,7 @@ function compareTime( $timestamp, $props ) {
 
 function retrieveQsFromWp( $pages, $wpapi ){
 	
-	$batch = 100;
+	$batch = 50;
 	$count = 0;
 	$titles = array();
 	$retrieve = array();
