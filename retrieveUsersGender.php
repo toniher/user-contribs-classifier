@@ -88,7 +88,22 @@ function getUsersGender( $users, $wpapi ) {
 	$listPage = new Mwapi\SimpleRequest( 'query', $params );
 	$outcome = $wpapi->postRequest( $listPage );
 	
-	var_dump( $outcome );
+	if ( array_key_exists( "query", $outcome ) ) {
+		
+		if ( array_key_exists( "users", $outcome["query"] ) ) {
+			
+			foreach ( $outcome["query"]["users"] as $user ) {
+				
+				if ( array_key_exists( "gender", $user )  && array_key_exists( "name", $user ) ) {
+					
+					echo $user["name"]."\t".$user["gender"]."\n";
+				}
+				
+			}
+			
+		}
+	}
+	
 }
 
 
