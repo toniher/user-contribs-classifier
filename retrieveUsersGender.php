@@ -83,8 +83,6 @@ function getUsersGender( $users, $wpapi ) {
 	$params["ususers"] = $usersStr;
 	$params["usprop"] = "gender";
 
-	var_dump( $params );
-
 	$listPage = new Mwapi\SimpleRequest( 'query', $params );
 	$outcome = $wpapi->postRequest( $listPage );
 	
