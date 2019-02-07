@@ -145,6 +145,11 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 	foreach ( $users as $user ) {
 		
 		$row = array();
+
+		if ( $user == "" ) {
+			continue;
+		}
+
 		array_push( $row, $user );
 		
 		if ( array_key_exists( $user, $gender ) ){
@@ -243,15 +248,13 @@ function processCSV( $file, $username, &$countBios, &$countNoMaleBios, &$sizeBio
 
 			if ( $columns[2] != $male ) {
 				$countNoMaleBios[ $username ]++;
-				$sizeNoMaleBios[ $username ] =+ $columns[1];
+				$sizeNoMaleBios[ $username ] += $columns[1];
 			}
 	
 			
 			$countBios[ $username ]++;
-			$sizeBios[ $username ] =+ $columns[1];
+			$sizeBios[ $username ] += $columns[1];
 
-
-			echo $sizeBios[$username]."\t".$sizeNoMaleBios[$username]."\n";
 
 		}
 	}
