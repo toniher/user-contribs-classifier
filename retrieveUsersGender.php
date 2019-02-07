@@ -43,7 +43,7 @@ processUserFile( $userfile, $wpapi );
 
 function processUserFile( $userfile, $wpapi ){
 	
-	echo "User\tGender\n";
+	echo "User\tGender\tBot\n";
 	
 	$userfileText = file_get_contents( $userfile );
 	
@@ -81,7 +81,7 @@ function getUsersGender( $users, $wpapi ) {
 	
 	$params["list"] = "users";
 	$params["ususers"] = $usersStr;
-	$params["usprop"] = "gender";
+	$params["usprop"] = "gender|groups";
 
 	$listPage = new Mwapi\SimpleRequest( 'query', $params );
 	$outcome = $wpapi->postRequest( $listPage );
@@ -92,11 +92,25 @@ function getUsersGender( $users, $wpapi ) {
 			
 			foreach ( $outcome["query"]["users"] as $user ) {
 				
-				if ( array_key_exists( "gender", $user )  && array_key_exists( "name", $user ) ) {
+				$output = "";
+				
+				if ( array_key_exists( "gender", $user ) && array_key_exists( "name", $user ) ) {
 					
-					echo $user["name"]."\t".$user["gender"]."\n";
+					$output = $user["name"]."\t".$user["gender"]."\t";
 				}
 				
+				$bot = 0;
+				
+				if ( array_key_exists( "groups", $user ) ) {
+
+					if ( in_array( "bot", $user["groups"] ) ) {
+						
+						$bot = 1;
+					}
+				
+				}
+				
+				echo $output.$bot."\n";
 			}
 			
 		}
