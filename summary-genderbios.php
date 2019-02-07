@@ -65,7 +65,7 @@ if ( $format == 'wiki' ) {
 	foreach ( $output as $row ) {
 		if ( $c === 0 ) {
 			echo "{| class='wikitable sortable' style='text-align:center;'\n";
-			echo "!\n";
+			echo "!";
 			echo implode( "\n!", $row );
 			
 		} else {
