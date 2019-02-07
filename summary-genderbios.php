@@ -83,7 +83,7 @@ if ( $format == 'wiki' ) {
 	
 	foreach ( $output as $row ) {
 		
-		echo implode( "\t", $row );
+		echo implode( "\t", $row )."\n";
 	}
 }
 
