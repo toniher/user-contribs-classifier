@@ -56,6 +56,8 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 
 $output = processFiles( $listfile, $genderfile, $contribdir );
 
+var_dump( $output );
+
 if ( $format == 'wiki' ) {
 	
 	# Send to wiki page
@@ -83,7 +85,7 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 	$bot = array();
 	$countBios = array();
 	$countNoMaleNios = array();
-	$sizebios = array();
+	$sizeBios = array();
 	$sizeNoMaleBios = array();
 	
 	$userfileText = file_get_contents( $listfile );
@@ -119,7 +121,130 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 		$bot[$columns[0]] = $columns[2];
 
 	}
+	 
+	// Read dir
+	if ( is_dir( $contribdir ) ) {
+		if ( $dh = opendir( $contribdir ) ) {
+	
+			while (($file = readdir($dh)) !== false) {
+				
+				if ( endsWith( $file, ".csv" ) ) {
+					
+					$username = str_replace( ".csv", "", $file );
+					
+					processCSV( $contribdir."/".$file, $username, $countBios, $countNoMaleBios, $sizeBios, $sizeNoMaleBios );
+				}
+				
+			}
+			
+			closedir( $dh );
+		}
+	}
+	
+	foreach ( $users as $user ) {
+		
+		$row = array();
+		array_push( $row, $user );
+		
+		if ( array_key_exists( $user, $gender ) ){
+			array_push( $row, $gender[$user] );
+		} else {
+			array_push( $row, "" );
+		}
+
+		if ( array_key_exists( $user, $bot ) ){
+			array_push( $row, $bot[$user] );
+		} else {
+			array_push( $row, "" );
+		}
+		
+		if ( array_key_exists( $user, $countBios ) ){
+			array_push( $row, $countBios[$user] );
+		} else {
+			array_push( $row, 0 );
+		}
+
+		if ( array_key_exists( $user, $countNoMaleBios ) ){
+			array_push( $row, $countNoMaleBios[$user] );
+		} else {
+			array_push( $row, 0 );
+		}
+		
+		if ( array_key_exists( $user, $countBios ) && array_key_exists( $user, $countNoMaleBios ) ){
+			array_push( $row, $countNoMaleBios[$user]/$countBios[$user] );
+		} else {
+			array_push( $row, 0 );
+		}
+				
+		if ( array_key_exists( $user, $sizeBios ) ){
+			array_push( $row, $sizeBios[$user] );
+		} else {
+			array_push( $row, 0 );
+		}
+
+		if ( array_key_exists( $user, $sizeNoMaleBios ) ){
+			array_push( $row, $sizeNoMaleBios[$user] );
+		} else {
+			array_push( $row, 0 );
+		}
+		
+		if ( array_key_exists( $user, $sizeBios ) && array_key_exists( $user, $sizeNoMaleBios ) ){
+			array_push( $row, $sizeNoMaleBios[$user]/$sizeBios[$user] );
+		} else {
+			array_push( $row, 0 );
+		}
+		
+		array_push( $rows, $row );
+		
+	}
+	
+	return $rows;
+	
+}
+
+function processCSV( $file, $username, &$countBios, &$countNoMaleBios, &$sizeBios, &$sizeNoMaleBios ) {
+	
+	$male = "Q6581097";
+
+	$content = file_get_contents( $file );
+	
+	$rows = explode( "\n", $content );
+	
+	$c = 0;
+	
+	$countNoMaleBios[ $username ] = 0;
+	$sizeNoMaleBios[ $username ] = 0;
+	$countBios[ $username ] = 0;
+	$sizeBios[ $username ] = 0;
+		
+	foreach ( $rows as $row ) {
+		
+		$c++;
+
+		if ( $c <= 1 ) {
+			
+			continue;
+		}
+		
+		$columns = explode( "\t", $row );
+		
+		if ( $rows[2] !== $male ) {
+			$countNoMaleBios[ $username ]++;
+			$sizeNoMaleBios[ $username ] =+ $rows[1];
+		}
+		
+		$countBios[ $username ]++;
+		$sizeBios[ $username ] =+ $rows[1];	
+	}
 	
 }
 
 
+function endsWith($haystack, $needle){
+    $length = strlen($needle);
+    if ($length == 0) {
+        return true;
+    }
+
+    return (substr($haystack, -$length) === $needle);
+}
