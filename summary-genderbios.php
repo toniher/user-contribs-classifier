@@ -171,7 +171,12 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 		}
 		
 		if ( array_key_exists( $user, $countBios ) && array_key_exists( $user, $countNoMaleBios ) ){
-			array_push( $row, $countNoMaleBios[$user]/$countBios[$user] );
+			
+			if ( $countBios === 0 ) {
+				array_push( $row, 0 );
+			} else {
+				array_push( $row, $countNoMaleBios[$user]/$countBios[$user] );
+			}
 		} else {
 			array_push( $row, 0 );
 		}
@@ -189,7 +194,12 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 		}
 		
 		if ( array_key_exists( $user, $sizeBios ) && array_key_exists( $user, $sizeNoMaleBios ) ){
-			array_push( $row, $sizeNoMaleBios[$user]/$sizeBios[$user] );
+			
+			if ( $sizeBios === 0 ) {
+				array_push( $row, 0 );
+			} else {		
+				array_push( $row, $sizeNoMaleBios[$user]/$sizeBios[$user] );
+			}
 		} else {
 			array_push( $row, 0 );
 		}
