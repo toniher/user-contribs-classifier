@@ -107,7 +107,7 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 
 	$g = 0;
 	foreach ( $lines as $line ) {
-	
+
 		$g++;
 
 		if ( $g <= 1 ) {
@@ -116,12 +116,14 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 		}
 		
 		$columns = explode( "\t", $line );
-		
-		$gender[$columns[0]] = $columns[1];
-		$bot[$columns[0]] = $columns[2];
+
+		if ( count( $columns ) > 2 ) {
+			$gender[$columns[0]] = $columns[1];
+			$bot[$columns[0]] = $columns[2];
+		}
 
 	}
-	 
+
 	// Read dir
 	if ( is_dir( $contribdir ) ) {
 		if ( $dh = opendir( $contribdir ) ) {
@@ -131,7 +133,6 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 				if ( endsWith( $file, ".csv" ) ) {
 					
 					$username = str_replace( ".csv", "", $file );
-					
 					processCSV( $contribdir."/".$file, $username, $countBios, $countNoMaleBios, $sizeBios, $sizeNoMaleBios );
 				}
 				
@@ -172,10 +173,10 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 		
 		if ( array_key_exists( $user, $countBios ) && array_key_exists( $user, $countNoMaleBios ) ){
 			
-			if ( $countBios === 0 ) {
+			if ( $countBios[$user] === 0 ) {
 				array_push( $row, 0 );
 			} else {
-				array_push( $row, $countNoMaleBios[$user]/$countBios[$user] );
+				array_push( $row, round( ( $countNoMaleBios[$user]/$countBios[$user] )*100, 2 ) );
 			}
 		} else {
 			array_push( $row, 0 );
@@ -195,10 +196,10 @@ function processFiles( $listfile, $genderfile, $contribdir ){
 		
 		if ( array_key_exists( $user, $sizeBios ) && array_key_exists( $user, $sizeNoMaleBios ) ){
 			
-			if ( $sizeBios === 0 ) {
+			if ( $sizeBios[$user] === 0 ) {
 				array_push( $row, 0 );
 			} else {		
-				array_push( $row, $sizeNoMaleBios[$user]/$sizeBios[$user] );
+				array_push( $row, round( ( $sizeNoMaleBios[$user]/$sizeBios[$user] )*100, 2 ) );
 			}
 		} else {
 			array_push( $row, 0 );
@@ -235,18 +236,27 @@ function processCSV( $file, $username, &$countBios, &$countNoMaleBios, &$sizeBio
 			
 			continue;
 		}
-		
-		$columns = explode( "\t", $row );
-		
-		if ( $row[2] != $male ) {
-			$countNoMaleBios[ $username ]++;
-			$sizeNoMaleBios[ $username ] =+ $rows[1];
-		}
-		
-		$countBios[ $username ]++;
-		$sizeBios[ $username ] =+ $rows[1];	
-	}
 	
+		$columns = explode( "\t", $row );
+
+		if ( count( $columns ) > 2 ) {
+
+			if ( $columns[2] != $male ) {
+				$countNoMaleBios[ $username ]++;
+				$sizeNoMaleBios[ $username ] =+ $columns[1];
+			}
+	
+			
+			$countBios[ $username ]++;
+			$sizeBios[ $username ] =+ $columns[1];
+
+
+			echo $sizeBios[$username]."\t".$sizeNoMaleBios[$username]."\n";
+
+		}
+	}
+
+
 }
 
 
