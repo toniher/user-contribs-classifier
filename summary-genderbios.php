@@ -56,15 +56,35 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 
 $output = processFiles( $listfile, $genderfile, $contribdir );
 
-var_dump( $output );
+#var_dump( $output );
 
 if ( $format == 'wiki' ) {
 	
 	# Send to wiki page
+	$c = 0;
+	foreach ( $output as $row ) {
+		if ( $c === 0 ) {
+			echo "{| class='wikitable sortable' style='text-align:center;'\n";
+			echo "!\n";
+			echo implode( "\n!", $row );
+			
+		} else {
+			echo "\n|-\n|";
+			echo implode( " || ", $row );
+		}
+		$c++;
+	}
+	
+	echo "\n|}\n";
 	
 } else {
 	
 	# Print as CSV
+	
+	foreach ( $output as $row ) {
+		
+		echo implode( "\t", $row );
+	}
 }
 
 
