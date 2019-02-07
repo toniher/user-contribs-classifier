@@ -238,7 +238,7 @@ function processCSV( $file, $username, &$countBios, &$countNoMaleBios, &$sizeBio
 		
 		$columns = explode( "\t", $row );
 		
-		if ( $rows[2] != $male ) {
+		if ( $row[2] != $male ) {
 			$countNoMaleBios[ $username ]++;
 			$sizeNoMaleBios[ $username ] =+ $rows[1];
 		}
