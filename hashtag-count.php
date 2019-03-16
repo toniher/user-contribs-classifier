@@ -93,7 +93,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	var_dump( $pages );
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
-
+	var_dump( $history );
 }
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
@@ -169,7 +169,6 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 
 function processHistory( $history, $wpapi, $outcome ) {
 
-
 	if ( array_key_exists( "query", $outcome ) ) {
 	
 		if ( array_key_exists( "pages", $outcome["query"] ) ) {
@@ -181,10 +180,8 @@ function processHistory( $history, $wpapi, $outcome ) {
 				$history[$title] = array();
 				$history[$title]["parentrev"] = null;
 				$history[$title]["contribs"] = array();
-				$history[$title]["created"] = false;
 				$parentid = null;
-				$parentsize = 0;
-				$parentCategories = array();
+				$accsize = 0;
 				
 				if ( array_key_exists( "revisions", $page ) ) {
 					
@@ -192,14 +189,71 @@ function processHistory( $history, $wpapi, $outcome ) {
 					
 					if ( count( $revisions ) > 0 ) {
 						
+						# Starting point
 						if ( array_key_exists( "parentid", $revisions[0] ) ) {
 							
 							$parentid = $revisions[0]["parentid"];
 							
 							# If page not created, proceed
 							if ( $parentid > 0 ) {
+								
 								#https://ca.wikipedia.org/w/api.php?action=query&revids=20872217&rvprop=size|user|timestamp&prop=revisions|categories
+								$params = array( "revids" => $parentid, "rvprop" => "size|user|timestamp", "prop" => "revisions|categories" );
+								$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
+								$outcome = $wpapi->postRequest( $userContribRequest );
+								
+								if ( array_key_exists( "query", $outcome ) ) {
+									
+									if ( array_key_exists( "pages", $outcome["query"] ) ) {
+									
+										foreach ( $outcome["query"]["pages"] as $pageid => $struct ) {
+											
+											if ( array_key_exists( "revisions", $struct ) ) {
+												if ( count( $struct["revisions"] ) > 0 ) {
+													
+													$history[$title]["parentrev"] = $struct["revisions"][0];
+													$history[$title]["parentrev"]["categories"] = array();
+													$accsize = $struct["revisions"][0]["size"];
+												}
+											}
+											
+											if ( array_key_exists( "categories", $struct ) ) {
+												
+												foreach ( $struct["categories"] as $cat ) {
+													
+													if ( array_key_exists( "title", $cat ) ) {
+														array_push( $history[$title]["parentrev"]["categories"], $cat["title"] );
+													}
+													
+												}
+												
+											}											
+											
+										}
+									
+									}									
+								}
+								
 							}
+							
+						}
+						
+						$presize = $accsize;
+						
+						# Iterate revisions and add user contributions
+						foreach( $revisions as $revision ) {
+							
+							$user = $revision["user"];
+							$size = $revision["size"];
+							
+							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
+							
+								$history[$title]["contribs"][$user] = array();
+							}
+							
+							array_push( $history[$title]["contribs"][$user], $size - $presize );
+							
+							$presize = $size;
 							
 						}
 						
