@@ -94,6 +94,14 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
 	var_dump( $history );
+	
+	// Get users from tags
+	$users = retrieveUsers( $pages );
+	// var_dump( $users );
+	
+	// Get counting from users
+	$counts = getCounts( $history, $users );
+	var_dump( $counts );
 }
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
@@ -304,4 +312,44 @@ function detectTag( $comment, $tags ){
 	
 	return false;
 	
+}
+
+function retrieveUsers( $pages ) {
+	
+	$users = array();
+	
+	foreach ( $pages as $page => $us ) {
+		
+		foreach ( array_unique( $us ) as $elm ) {
+			array_push( $users, $elm );
+		}
+	}
+	
+	return array_unique( $users );
+	
+}
+
+function getCounts( $history, $users ) {
+	
+	$counts = array();
+	
+	// Iterate by user
+	foreach ( $users as $user ) {
+		
+		$counts[$user] = array();
+		
+		foreach ( $history as $page => $struct ) {
+			
+			$contribs = $struct["contribs"];
+			
+			if ( array_key_exists( $user, $contribs ) ) {
+				
+				$counts[$user][$page] = array_sum( $contribs[$user] );
+			
+			}
+			
+		}
+	}
+	
+	return( $counts );
 }
