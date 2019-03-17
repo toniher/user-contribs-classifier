@@ -105,9 +105,12 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// var_dump( $counts );
 	
 	// Assign scores
-	$scores = assignScores( $counts, $props );
-	// var_dump( $scores );
-	printScores( $scores );
+	if ( array_key_exists( "scores", $props ) ) {
+		$scores = assignScores( $counts, $props );
+		// var_dump( $scores );
+		printScores( $scores );
+	}
+
 	
 	
 }
