@@ -2,7 +2,7 @@
 
 Tools for retrieving reports of users contributions
 
-## User contributions
+## User contributions
     php query.php myconfigfile.json MyUser taskname
 
 ## Hashtag contributions 
