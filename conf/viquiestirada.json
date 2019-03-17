@@ -1,0 +1,72 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxxxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxxxx"
+  },
+  "tasks": {
+    "viquiestirada": {
+      "startdate": "2019-03-01 00:00:00",
+      "enddate": "2019-03-17 00:00:00",
+      "namespace": 0,
+      "tag": [
+        "viquiestirada"
+      ],
+      "pagefilter": {
+        "extramarch": {
+          "pages": [
+            "Papa Pau I",
+            "Dorothy L. Sayers",
+            "Tian Han",
+            "Muhammad Iqbal",
+            "Conxita Julià",
+            "Annie Leonard",
+            "Ernesto Geisel",
+            "Clara Rockmore",
+            "Ellen Johnson Sirleaf",
+            "Joost van den Vondel",
+            "Joyce Banda",
+            "John Newlands",
+            "Hilary Putnam",
+            "Mai Aizawa",
+            "Jordi Hurtado",
+            "Sofia Essaïdi",
+            "Vera Timànova",
+            "Bies de Prienne",
+            "Fritz Zwicky",
+            "Rachel Kushner",
+            "Al-Jàhidh",
+            "Mateusz Morawiecki",
+            "Tiffany Trump",
+            "Amancio Ortega",
+            "Paul Kagame",
+            "Judy Fiskin",
+            "Nat Love",
+            "Virginia Apgar",
+            "Cynthia Powell",
+            "Nabucodonosor I"
+          ]
+        }
+      },
+      "scores": {
+        "standard": {
+          "min": 3000,
+          "minsum": 5,
+          "range": 1000,
+          "sum": 1
+        },
+        "extramarch": {
+          "min": 10000,
+          "minsum": 35,
+          "range": 1000,
+          "sum": 1
+        }
+      }
+    }
+  }
+}
