@@ -1,6 +1,7 @@
 <?php
 
 require_once( __DIR__ . '/vendor/autoload.php' );
+require_once( __DIR__ . '/lib/scores.php' );
 
 use \Mediawiki\Api as MwApi;
 use \Mediawiki\Api\ApiUser;
@@ -90,10 +91,10 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 	
 	$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
-	var_dump( $pages );
+	// var_dump( $pages );
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
-	var_dump( $history );
+	// var_dump( $history );
 	
 	// Get users from tags
 	$users = retrieveUsers( $pages );
@@ -101,7 +102,14 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// Get counting from users
 	$counts = getCounts( $history, $users );
-	var_dump( $counts );
+	// var_dump( $counts );
+	
+	// Assign scores
+	$scores = assignScores( $counts, $props );
+	// var_dump( $scores );
+	printScores( $scores );
+	
+	
 }
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
@@ -284,17 +292,21 @@ function processPages( $pages, $contribs, $props ) {
 	
 	foreach ( $contribs as $contrib ) {
 		
-		$title = strval( $contrib["title"] );
-		$comment = strval( $contrib["comment"] );
-		$user = strval( $contrib["user"] );
-
-		if ( detectTag( $comment, $props["tag"] ) ) {
+		if ( array_key_exists( "title", $contrib ) ) {
+			
+			$title = strval( $contrib["title"] );
+			$comment = strval( $contrib["comment"] );
+			$user = strval( $contrib["user"] );
 	
-			if ( array_key_exists( $title, $pages ) ) {
-				array_push( $pages[$title], $user );
-			} else {
-				$pages[$title] = array( $user );
+			if ( detectTag( $comment, $props["tag"] ) ) {
+		
+				if ( array_key_exists( $title, $pages ) ) {
+					array_push( $pages[$title], $user );
+				} else {
+					$pages[$title] = array( $user );
+				}
 			}
+		
 		}
 	}
 	return $pages;
@@ -352,4 +364,15 @@ function getCounts( $history, $users ) {
 	}
 	
 	return( $counts );
+}
+
+function printScores( $scores ) {
+	
+	echo "Usuari\tPuntuació\n";
+	
+	foreach ( $scores as $user => $score ) {
+		
+		echo $user."\t".$score."\n";
+	}
+	
 }
