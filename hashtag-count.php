@@ -106,7 +106,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
-		$scores = assignScores( $counts, $props );
+		$scores = assignScores( $counts, $wapi, $props );
 		// var_dump( $scores );
 		printScores( $scores );
 	}
@@ -369,13 +369,3 @@ function getCounts( $history, $users ) {
 	return( $counts );
 }
 
-function printScores( $scores ) {
-	
-	echo "Usuari\tPuntuació\n";
-	
-	foreach ( $scores as $user => $score ) {
-		
-		echo $user."\t".$score."\n";
-	}
-	
-}
