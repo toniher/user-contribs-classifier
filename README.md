@@ -1,9 +1,12 @@
 # user-contribs-classifier
 
-Tool for retrieving reports of users contributions against Wikidata annotation
+Tools for retrieving reports of users contributions
 
-
+## User contributions
     php query.php myconfigfile.json MyUser taskname
+
+## Hashtag contributions 
+    php hashtag-count.php conf/viquiestirada.json viquiestirada
 
 # TODO
 
