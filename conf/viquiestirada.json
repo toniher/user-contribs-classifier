@@ -19,38 +19,7 @@
       ],
       "pagefilter": {
         "extramarch": {
-          "pages": [
-            "Papa Pau I",
-            "Dorothy L. Sayers",
-            "Tian Han",
-            "Muhammad Iqbal",
-            "Conxita Julià",
-            "Annie Leonard",
-            "Ernesto Geisel",
-            "Clara Rockmore",
-            "Ellen Johnson Sirleaf",
-            "Joost van den Vondel",
-            "Joyce Banda",
-            "John Newlands",
-            "Hilary Putnam",
-            "Mai Aizawa",
-            "Jordi Hurtado",
-            "Sofia Essaïdi",
-            "Vera Timànova",
-            "Bies de Prienne",
-            "Fritz Zwicky",
-            "Rachel Kushner",
-            "Al-Jàhidh",
-            "Mateusz Morawiecki",
-            "Tiffany Trump",
-            "Amancio Ortega",
-            "Paul Kagame",
-            "Judy Fiskin",
-            "Nat Love",
-            "Virginia Apgar",
-            "Cynthia Powell",
-            "Nabucodonosor I"
-          ]
+          "source": "Viquiprojecte:Viquiestirada/Març/Extra"
         }
       },
       "scores": {

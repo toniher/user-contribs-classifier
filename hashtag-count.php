@@ -106,7 +106,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
-		$scores = assignScores( $counts, $wapi, $props );
+		$scores = assignScores( $counts, $wpapi, $props );
 		// var_dump( $scores );
 		printScores( $scores );
 	}
