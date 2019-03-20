@@ -91,17 +91,30 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 	
 	$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
-	// var_dump( $pages );
+	//echo count( $pages )."\n";
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
-	// var_dump( $history );
+	//var_dump( $history );
+	
+	$filterin = null;
+	if ( array_key_exists( "filterin", $props ) ) {
+		$filterin = applyFilterIn( $history, $props["filterin"] );
+	}
+	//echo count( $filterin )."\n";
+	//
+	//$tal1 = array_keys( $pages );
+	//$tal2 = array_keys( $filterin );
+	//sort( $tal1 );
+	//sort( $tal2 );
+	//var_dump( array_diff( $tal1, $tal2 ) );
+	//// var_dump( $filterin );
 	
 	// Get users from tags
 	$users = retrieveUsers( $pages );
 	// var_dump( $users );
 	
 	// Get counting from users
-	$counts = getCounts( $history, $users );
+	$counts = getCounts( $history, $users, $filterin );
 	// var_dump( $counts );
 	
 	// Assign scores
@@ -341,6 +354,62 @@ function retrieveUsers( $pages ) {
 	}
 	
 	return array_unique( $users );
+	
+}
+
+function applyFilterIn( $history, $filterin ) {
+	
+	$toinclude = array( );
+	
+	foreach ( $filterin as $filter ) {
+		
+		if ( array_key_exists( "maxsize", $filter ) ) {
+			
+			$maxsize = $filter["maxsize"];
+			
+			foreach( $history as $page => $struct ) {
+				
+				if ( array_key_exists( "parentrev", $struct ) ) {
+					
+					if ( array_key_exists( "size", $struct["parentrev"] ) ) {
+				
+						if ( $struct["parentrev"]["size"] <= $maxsize ) {
+							$toinclude[$page] = true;
+						}
+
+					}
+				}
+			}
+			
+		}
+		
+		if ( array_key_exists( "catregex", $filter ) ) {
+			
+			$catregex = $filter["catregex"];
+			
+			foreach( $history as $page => $struct ) {
+				
+				if ( array_key_exists( "parentrev", $struct ) ) {
+					
+					if ( is_array( $struct["parentrev"] ) && array_key_exists( "categories", $struct["parentrev"] ) ) {
+				
+						foreach ( $struct["parentrev"]["categories"] as $category ) {
+							
+							preg_match( $catregex, $category, $matches );
+						
+							if ( count( $matches ) > 1 ) {
+															
+								$toinclude[$page] = true;
+							}							
+						}
+					}
+				}
+			}
+		}		
+	}
+	
+	
+	return $toinclude;
 	
 }
 

@@ -22,6 +22,14 @@
           "source": "Viquiprojecte:Viquiestirada/Març/Extra"
         }
       },
+      "filterin": [
+        {
+          "maxsize": 3000
+        },
+        {
+          "catregex": "\/sborrany\/"
+        }
+      ],
       "scores": {
         "standard": {
           "min": 3000,
