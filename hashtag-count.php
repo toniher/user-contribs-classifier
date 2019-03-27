@@ -121,7 +121,8 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	if ( array_key_exists( "scores", $props ) ) {
 		$scores = assignScores( $counts, $wpapi, $props );
 		// var_dump( $scores );
-		printScores( $scores );
+		
+		printScores( $scores, "wiki", $wpapi, $props["target"] );
 	}
 
 	
@@ -371,7 +372,7 @@ function applyFilterIn( $history, $filterin ) {
 				
 				if ( array_key_exists( "parentrev", $struct ) ) {
 					
-					if ( array_key_exists( "size", $struct["parentrev"] ) ) {
+					if ( $struct["parentrev"] && array_key_exists( "size", $struct["parentrev"] ) ) {
 				
 						if ( $struct["parentrev"]["size"] <= $maxsize ) {
 							$toinclude[$page] = true;

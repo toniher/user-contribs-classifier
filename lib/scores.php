@@ -137,13 +137,53 @@ function processContentList( $content ) {
 	
 }
 
-function printScores( $scores ) {
+function printScores( $scores, $mode="wiki", $wpapi, $target ) {
 	
-	echo "Usuari\tPuntuació\n";
-	
-	foreach ( $scores as $user => $score ) {
+	if ( $mode === "wiki" ) {
+
+		$string = "{| class='sortable'
+! Usuari !! Puntuació\n";
 		
-		echo $user."\t".$score."\n";
+		foreach ( $scores as $user => $score ) {
+			
+			$string.= "|-\n";
+			$string.= "| ". $user."||".$score."\n";
+		}
+		$string.= "|}";
+		
+		if ( $target && $wpapi ) {
+			
+			https://en.wikipedia.org/w/api.php?action=query&format=json&meta=tokens
+			$params = array( "meta" => "tokens" );
+			$getToken = new Mwapi\SimpleRequest( 'query', $params  );
+			$outcome = $wpapi->postRequest( $getToken );
+		
+			if ( array_key_exists( "query", $outcome ) ) {
+				if ( array_key_exists( "tokens", $outcome["query"] ) ) {
+					if ( array_key_exists( "csrftoken", $outcome["query"]["tokens"] ) ) {
+						
+						$token = $outcome["query"]["tokens"]["csrftoken"];
+						$params = array( "title" => $target, "summary" => "Viquiestirada", "text" => $string, "token" => $token );
+						$sendText = new Mwapi\SimpleRequest( 'edit', $params  );
+						$outcome = $wpapi->postRequest( $sendText );			
+					
+					}				
+				}
+			}
+
+		} else {
+			echo $string;
+		}
+		
+	} else {
+	
+		echo "Usuari\tPuntuació\n";
+		
+		foreach ( $scores as $user => $score ) {
+			
+			echo $user."\t".$score."\n";
+		}
+	
 	}
 	
 }
