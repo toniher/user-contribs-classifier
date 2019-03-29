@@ -92,7 +92,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 	//echo count( $pages )."\n";
-	
+		
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
 	//var_dump( $history );
 	
@@ -174,7 +174,7 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 	$stack = array( );
 	
 	$rvlimit = 500;
-	$params = array( "prop" => "revisions", "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids" );
+	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids" );
 	
 	
 	if ( array_key_exists( "startdate", $props ) ) {
