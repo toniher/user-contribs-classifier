@@ -137,17 +137,31 @@ function processContentList( $content ) {
 	
 }
 
-function printScores( $scores, $mode="wiki", $wpapi, $target ) {
+function printPags( $pags ) {
+	
+	$str = array();
+	
+	foreach ( $pags as $pag ) {
+		
+		array_push( $str, "[[".$pag."]]" );
+		
+	}
+	
+	return implode( ", ", $str );
+	
+}
+
+function printScores( $scores, $mode="wiki", $wpapi, $counts, $target ) {
 	
 	if ( $mode === "wiki" ) {
 
-		$string = "{| class='sortable'
-! Usuari !! Puntuació\n";
+		$string = "{| class='sortable mw-collapsible mw-collapsed wikitable'
+! Participant !! Articles || Puntuació\n";
 		
 		foreach ( $scores as $user => $score ) {
 			
 			$string.= "|-\n";
-			$string.= "| ". $user."||".$score."\n";
+			$string.= "| [[User:". $user."|".$user."]] || ".printPags( array_keys( $counts[$user] ) )." ||".$score."\n";
 		}
 		$string.= "|}";
 		

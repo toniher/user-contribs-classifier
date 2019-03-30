@@ -122,7 +122,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$scores = assignScores( $counts, $wpapi, $props );
 		// var_dump( $scores );
 		
-		printScores( $scores, "wiki", $wpapi, $props["target"] );
+		printScores( $scores, "wiki", $wpapi, $counts, $props["target"] );
 	}
 
 	
