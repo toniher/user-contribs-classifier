@@ -161,7 +161,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $target ) {
 		foreach ( $scores as $user => $score ) {
 			
 			$string.= "|-\n";
-			$string.= "| [[User:". $user."|".$user."]] || ".printPags( array_keys( $counts[$user] ) )." ||".$score."\n";
+			$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )." ||".$score."\n";
 		}
 		$string.= "|}";
 		
