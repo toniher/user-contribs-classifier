@@ -12,7 +12,7 @@
   "tasks": {
     "viquiestirada": {
       "startdate": "2019-03-01 00:00:00",
-      "enddate": "2019-03-17 00:00:00",
+      "enddate": "2019-03-31 23:59:59",
       "namespace": 0,
       "tag": [
         "viquiestirada"
@@ -44,7 +44,7 @@
           "sum": 1
         }
       },
-      "target": "Usuari:Toniher/Viquiestirada/201903"
+      "target": "Viquiprojecte:Viquiestirada/Març/Classificació"
     }
   }
 }
