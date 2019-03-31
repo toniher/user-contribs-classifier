@@ -11,15 +11,15 @@
   },
   "tasks": {
     "viquiestirada": {
-      "startdate": "2019-03-01 00:00:00",
-      "enddate": "2019-03-31 21:59:59",
+      "startdate": "2019-03-31 22:00:00",
+      "enddate": "2019-04-30 21:59:59",
       "namespace": 0,
       "tag": [
         "viquiestirada"
       ],
       "pagefilter": {
         "extramarch": {
-          "source": "Viquiprojecte:Viquiestirada/Març/Extra"
+          "source": "Viquiprojecte:Viquiestirada/Abril/Extra"
         }
       },
       "filterin": [
@@ -44,7 +44,7 @@
           "sum": 1
         }
       },
-      "target": "Viquiprojecte:Viquiestirada/Març/Classificació"
+      "target": "Viquiprojecte:Viquiestirada/Abril/Classificació"
     }
   }
 }
