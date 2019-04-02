@@ -1,5 +1,7 @@
 <?php
 
+// ini_set('memory_limit', '32384M');
+
 require_once( __DIR__ . '/vendor/autoload.php' );
 
 use \Mediawiki\Api as MwApi;
@@ -79,7 +81,7 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 	
 	$wpapi->login( new ApiUser( $wikiconfig["user"], $wikiconfig["password"] ) );
 	// This below assumes you're a bot
-	$uclimit = 1000;
+	$uclimit = 500;
 
 }
 
@@ -181,7 +183,7 @@ function processPages( $pages, $contribs, $props ) {
 		$struct = array( "timestamp" => $timestamp, "size" => $size );
 		
 		# Regex skip comment
-		if ( array_key_exists( "skip_startswith", $props ) ) {
+		if ( array_key_exists( "skip_startswith", $props ) && array_key_exists( "comment", $contrib ) ) {
 			
 			if ( startsWith( $contrib["comment"], $props["skip_startswith"] ) ) {
 				continue;
@@ -258,7 +260,7 @@ function compareTime( $timestamp, $props ) {
 
 function retrieveQsFromWp( $pages, $wpapi ){
 	
-	$batch = 100;
+	$batch = 50;
 	$count = 0;
 	$titles = array();
 	$retrieve = array();
