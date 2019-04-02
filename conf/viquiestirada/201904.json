@@ -1,0 +1,50 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxxxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxxxx"
+  },
+  "tasks": {
+    "viquiestirada": {
+      "startdate": "2019-03-31 22:00:00",
+      "enddate": "2019-04-30 21:59:59",
+      "namespace": 0,
+      "tag": [
+        "viquiestirada"
+      ],
+      "pagefilter": {
+        "extramarch": {
+          "source": "Viquiprojecte:Viquiestirada/Abril/Extra"
+        }
+      },
+      "filterin": [
+        {
+          "maxsize": 3000
+        },
+        {
+          "catregex": "\/sborrany\/"
+        }
+      ],
+      "scores": {
+        "standard": {
+          "min": 3000,
+          "minsum": 5,
+          "range": 1000,
+          "sum": 1
+        },
+        "extramarch": {
+          "min": 10000,
+          "minsum": 35,
+          "range": 1000,
+          "sum": 1
+        }
+      },
+      "target": "Viquiprojecte:Viquiestirada/Abril/Classificació"
+    }
+  }
+}
