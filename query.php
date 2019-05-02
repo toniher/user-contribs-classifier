@@ -113,6 +113,14 @@ if ( array_key_exists( "enddate", $props ) ) {
 // Get pages of user
 $pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 
+if ( array_key_exists( "redirectmerge", $props ) ) {
+
+	if ( $props["redirectmerge"] ) {
+		$pages = redirectMerge( $pages, $wpapi );
+	} 
+
+} 
+
 $retrieve = null;
 $result = null;
 
@@ -140,6 +148,13 @@ if ( array_key_exists( "retrieve", $props ) ) {
 
 
 printAll( $pages, $retrieve, $result, $props );
+
+function redirectMerge( $pages, $wpapi ) {
+
+	# Handle redirects below
+	return $pages;
+
+}
 
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
