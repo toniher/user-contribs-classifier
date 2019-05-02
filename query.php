@@ -113,23 +113,31 @@ if ( array_key_exists( "enddate", $props ) ) {
 // Get pages of user
 $pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 
-// Get Qs of pages
-$retrieve = retrieveQsFromWp( $pages, $wpapi );
+$retrieve = null;
+$result = null;
 
-$wpapi->logout();
-
-$wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
-
-// Login
-if ( array_key_exists( "user", $wikidataconfig ) && array_key_exists( "password", $wikidataconfig ) ) {
+# Only if we handle Wikidata Props
+if ( array_key_exists( "retrieve", $props ) ) {
+	// Get Qs of pages
+	$retrieve = retrieveQsFromWp( $pages, $wpapi );
 	
-	$wdapi->login( new ApiUser( $wikidataconfig["user"], $wikidataconfig["password"] ) );
+	$wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
+	
+	// Login
+	if ( array_key_exists( "user", $wikidataconfig ) && array_key_exists( "password", $wikidataconfig ) ) {
+		
+		$wdapi->login( new ApiUser( $wikidataconfig["user"], $wikidataconfig["password"] ) );
+	
+	}
+	
+	$result = retrievePropsFromWd( $retrieve, $props, $wdapi );
 
 }
 
-$result = retrievePropsFromWd( $retrieve, $props, $wdapi );
+# TODO: This changed and now token is needed
+#$wpapi->logout();
+#$wdapi->logout();
 
-$wdapi->logout();
 
 printAll( $pages, $retrieve, $result, $props );
 
@@ -539,11 +547,19 @@ function processDataValue( $datavalue ) {
 	
 }
 
-function printAll( $pages, $retrieve, $result, $props ) {
+function printAll( $pages, $retrieve, $result, $props, $sum=true ) {
+		
+	if ( array_key_exists( "retrieve", $props ) ) {
 	
-	echo "Page\tSize\t".implode( "\t", $props["retrieve"] )."\n";
+		echo "Page\tSize\t".implode( "\t", $props["retrieve"] )."\n";
 
+	} else {
+		echo "Page\tSize\n";	
+	}
+	
 	foreach ( $pages as $page => $struct ) {
+	
+		$sumVal = 0;
 		
 		$print = 0;
 		if ( array_key_exists( "size", $props ) ) {
@@ -554,9 +570,19 @@ function printAll( $pages, $retrieve, $result, $props ) {
 				continue;
 			}
 			
+			if ( $sum ) {
+				$sumVal =+ $struct["size"];
+			
+			}
 		}
 		
-		if ( array_key_exists( $page, $retrieve["pagesQ"] ) ) {
+		$size = $struct["size"];
+			
+		if ( $sum ) {
+			$size = $sumVal;
+		}
+		
+		if ( $retrieve && array_key_exists( $page, $retrieve["pagesQ"] ) ) {
 			
 			$qid = $retrieve["pagesQ"][$page];
 
@@ -583,10 +609,14 @@ function printAll( $pages, $retrieve, $result, $props ) {
 			}
 			
 			if ( $print > 0 ) {
-			
-				echo $page."\t".$struct["size"]."\t".implode( "\t", $vals ), "\n";
+				
+				echo $page."\t".$size."\t".implode( "\t", $vals ), "\n";
 
 			}
+		} else {
+			
+			echo $page."\t".$size."\n";
+			
 		}
 		
 		
