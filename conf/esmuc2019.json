@@ -16,7 +16,7 @@
 			"namespace": 0,
 			"redirectmerge": true,
 			"newonly": false,
-			"size": 100,
+			"size": 5,
 			"skip_startswith": "Rever"
 		}
 	}
