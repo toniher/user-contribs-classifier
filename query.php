@@ -667,6 +667,11 @@ function processDataValue( $datavalue ) {
 
 function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 
+	if ( array_key_exists( "wikiformat", $props ) ) {
+		if ( $props["wikiformat"] ) {
+			$username = "{{u|".$username."}}";
+		}
+	}
 	
 	foreach ( $pages as $page => $struct ) {
 	
@@ -721,10 +726,22 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 			
 			if ( $print > 0 ) {
 				
+				if ( array_key_exists( "wikiformat", $props ) ) {
+					if ( $props["wikiformat"] ) {
+						$page = "[[".$page."]]";
+					}
+				}
+				
 				echo $username."\t".$page."\t".$size."\t".implode( "\t", $vals ), "\n";
 
 			}
 		} else {
+
+			if ( array_key_exists( "wikiformat", $props ) ) {
+				if ( $props["wikiformat"] ) {
+					$page = "[[".$page."]]";
+				}
+			}
 			
 			echo $username."\t".$page."\t".$size."\n";
 			

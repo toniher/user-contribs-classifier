@@ -15,6 +15,7 @@
 			"enddate": "2019-04-29T22:00:00Z",
 			"namespace": 0,
 			"redirectmerge": true,
+			"wikiformat": true,
 			"newonly": false,
 			"size": 5,
 			"skip_startswith": "Rever"
