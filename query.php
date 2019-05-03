@@ -150,8 +150,80 @@ if ( array_key_exists( "retrieve", $props ) ) {
 printAll( $pages, $retrieve, $result, $props );
 
 function redirectMerge( $pages, $wpapi ) {
+	
+	$listPages = array_keys( $pages );
+	
+	$num = 10;
+	
+	$contPages = array();
+	
+	$i = 0;
+	$c = 0;
+	
+	foreach ( $listPages as $page ) {
+	
+		if ( $i == 0 ) {
+			$contPages[] = array();
+		}
+		
+		array_push( $contPages[$c], $page );
+		
+		$i++;
+		if ( $i == $num ) {
+			$i = 0;
+			$c++;
+		}
+		
+	}
+	
+	$mapping = array();
+	
+	foreach ( $contPages as $cont ) {
+		
+		$titles = implode( "|", $cont );
+		
+		$params = array( 'titles' => $titles, 'redirects' => true );
+		
+		$redRequest = new Mwapi\SimpleRequest( 'query', $params  );
 
-	# Handle redirects below
+		$outcome = $wpapi->postRequest( $redRequest );
+		
+		if ( array_key_exists( "query", $outcome ) ) {
+		
+			if ( array_key_exists( "redirects", $outcome["query"] ) ) {
+	
+				foreach( $outcome["query"]["redirects"] as $redirect ) {
+					
+					if ( array_key_exists( "from", $redirect ) ) {
+						$mapping[$redirect["from"]]= $redirect["to"];
+					}
+					
+				}
+		
+			}
+		
+		}
+		
+	}
+	
+	foreach( $pages as $page => $struct ) {
+		
+		if ( array_key_exists( $page, $mapping ) ) {
+			$redirect = $mapping[$page];
+			
+			if ( ! array_key_exists( $redirect, $pages ) ) {
+				$pages[$redirect] = array();
+				$pages[$redirect]["size"] = 0;
+			}
+			
+			$pages[$redirect]["size"]+= $pages[$page]["size"];
+			unset( $pages[$page] );
+				
+			
+		}
+		
+	}
+
 	return $pages;
 
 }

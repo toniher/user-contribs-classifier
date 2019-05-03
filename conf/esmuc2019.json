@@ -14,6 +14,7 @@
 			"startdate": "2019-04-29T06:00:00Z",
 			"enddate": "2019-04-29T22:00:00Z",
 			"namespace": 0,
+			"redirectmerge": true,
 			"newonly": false,
 			"size": 100,
 			"skip_startswith": "Rever"
