@@ -1,0 +1,24 @@
+{
+	"wikipedia": {
+		"url": "https://ca.wikipedia.org/w/api.php",
+		"user": "xxx",
+		"password": "xxx"
+	},
+	"wikidata": {
+		"url": "https://www.wikidata.org/w/api.php",
+		"user": "Catabot",
+		"password": "xxx"
+	},
+	"tasks": {
+		"esmuc2019": {
+			"startdate": "2019-04-29T06:00:00Z",
+			"enddate": "2019-04-29T22:00:00Z",
+			"namespace": 0,
+			"redirectmerge": true,
+			"wikiformat": true,
+			"newonly": false,
+			"size": 5,
+			"skip_startswith": "Rever"
+		}
+	}
+}

@@ -12,7 +12,7 @@ use \Wikibase\DataModel as WbDM;
 
 // Detect commandline args
 $conffile = 'config.json';
-$username = null;
+$userhandle = null;
 $taskname = null; // If no task given, exit
 
 if ( count( $argv ) > 1 ) {
@@ -20,7 +20,7 @@ if ( count( $argv ) > 1 ) {
 }
 
 if ( count( $argv ) > 2 ) {
-	$username = $argv[2];
+	$userhandle = $argv[2];
 }
 
 if ( count( $argv ) > 3 ) {
@@ -28,7 +28,7 @@ if ( count( $argv ) > 3 ) {
 }
 
 // Detect if files
-if ( ! file_exists( $conffile ) || ! $username ) {
+if ( ! file_exists( $conffile ) || ! $userhandle ) {
 	die( "Config file or username needed" );
 }
 
@@ -70,8 +70,6 @@ if ( ! $taskname ) {
 	}
 }
 
-$pages = array( );
-
 $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
 $uclimit = 500;
@@ -85,53 +83,181 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 
 }
 
-$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => $uclimit, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
+# Base print
+if ( array_key_exists( "retrieve", $props ) ) {
 
-if ( array_key_exists( "namespace", $props ) ) {
-	$params["ucnamespace"] = $props["namespace"];
+	echo "User\tPage\tSize\t".implode( "\t", $props["retrieve"] )."\n";
+
+} else {
+	echo "User\tPage\tSize\n";	
 }
 
-if ( array_key_exists( "newonly", $props ) ) {
+$userlist = array( );
+
+if ( file_exists( $userhandle ) ) {
 	
-	if ( $props["newonly"] ) {
-		$params["ucshow"] = "new";
+	$userstr = file_get_contents( $userhandle );
+	$userlist = explode( "\n", $userstr );
+	
+} else {
+	
+	$userlist = explode( ",", $userhandle );
+}
+
+foreach( $userlist as $username ) {
+	
+	$username = trim( $username );
+
+	$pages = array( );
+	
+	if ( empty( $username ) ) {
+		continue;
 	}
 	
-}
-
-if ( array_key_exists( "startdate", $props ) ) {
-	$params["ucstart"] = $props["startdate"];
-	$params["ucdir"] = "newer";
-}
-
-if ( array_key_exists( "enddate", $props ) ) {
-	$params["ucend"]= $props["enddate"];
-	$params["ucdir"] = "newer";
-}
-
-
-// Get pages of user
-$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
-
-// Get Qs of pages
-$retrieve = retrieveQsFromWp( $pages, $wpapi );
-
-$wpapi->logout();
-
-$wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
-
-// Login
-if ( array_key_exists( "user", $wikidataconfig ) && array_key_exists( "password", $wikidataconfig ) ) {
+	$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => $uclimit, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
 	
-	$wdapi->login( new ApiUser( $wikidataconfig["user"], $wikidataconfig["password"] ) );
+	if ( array_key_exists( "namespace", $props ) ) {
+		$params["ucnamespace"] = $props["namespace"];
+	}
+	
+	if ( array_key_exists( "newonly", $props ) ) {
+		
+		if ( $props["newonly"] ) {
+			$params["ucshow"] = "new";
+		}
+		
+	}
+	
+	if ( array_key_exists( "startdate", $props ) ) {
+		$params["ucstart"] = $props["startdate"];
+		$params["ucdir"] = "newer";
+	}
+	
+	if ( array_key_exists( "enddate", $props ) ) {
+		$params["ucend"]= $props["enddate"];
+		$params["ucdir"] = "newer";
+	}
+	
+	
+	// Get pages of user
+	$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
+	
+	if ( array_key_exists( "redirectmerge", $props ) ) {
+	
+		if ( $props["redirectmerge"] ) {
+			$pages = redirectMerge( $pages, $wpapi );
+		} 
+	
+	} 
+	
+	$retrieve = null;
+	$result = null;
+	
+	# Only if we handle Wikidata Props
+	if ( array_key_exists( "retrieve", $props ) ) {
+		// Get Qs of pages
+		$retrieve = retrieveQsFromWp( $pages, $wpapi );
+		
+		$wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
+		
+		// Login
+		if ( array_key_exists( "user", $wikidataconfig ) && array_key_exists( "password", $wikidataconfig ) ) {
+			
+			$wdapi->login( new ApiUser( $wikidataconfig["user"], $wikidataconfig["password"] ) );
+		
+		}
+		
+		$result = retrievePropsFromWd( $retrieve, $props, $wdapi );
+	
+	}
+	
+	# TODO: This changed and now token is needed
+	#$wpapi->logout();
+	#$wdapi->logout();
+	
+	
+	printAll( $pages, $retrieve, $result, $props, $username );
 
 }
 
-$result = retrievePropsFromWd( $retrieve, $props, $wdapi );
+function redirectMerge( $pages, $wpapi ) {
+	
+	$listPages = array_keys( $pages );
+	
+	$num = 10;
+	
+	$contPages = array();
+	
+	$i = 0;
+	$c = 0;
+	
+	foreach ( $listPages as $page ) {
+	
+		if ( $i == 0 ) {
+			$contPages[] = array();
+		}
+		
+		array_push( $contPages[$c], $page );
+		
+		$i++;
+		if ( $i == $num ) {
+			$i = 0;
+			$c++;
+		}
+		
+	}
+	
+	$mapping = array();
+	
+	foreach ( $contPages as $cont ) {
+		
+		$titles = implode( "|", $cont );
+		
+		$params = array( 'titles' => $titles, 'redirects' => true );
+		
+		$redRequest = new Mwapi\SimpleRequest( 'query', $params  );
 
-$wdapi->logout();
+		$outcome = $wpapi->postRequest( $redRequest );
+		
+		if ( array_key_exists( "query", $outcome ) ) {
+		
+			if ( array_key_exists( "redirects", $outcome["query"] ) ) {
+	
+				foreach( $outcome["query"]["redirects"] as $redirect ) {
+					
+					if ( array_key_exists( "from", $redirect ) ) {
+						$mapping[$redirect["from"]]= $redirect["to"];
+					}
+					
+				}
+		
+			}
+		
+		}
+		
+	}
+	
+	foreach( $pages as $page => $struct ) {
+		
+		if ( array_key_exists( $page, $mapping ) ) {
+			$redirect = $mapping[$page];
+			
+			if ( ! array_key_exists( $redirect, $pages ) ) {
+				$pages[$redirect] = array();
+				$pages[$redirect]["size"] = 0;
+			}
+			
+			$pages[$redirect]["size"]+= $pages[$page]["size"];
+			unset( $pages[$page] );
+				
+			
+		}
+		
+	}
 
-printAll( $pages, $retrieve, $result, $props );
+	return $pages;
+
+}
 
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
@@ -539,11 +665,17 @@ function processDataValue( $datavalue ) {
 	
 }
 
-function printAll( $pages, $retrieve, $result, $props ) {
-	
-	echo "Page\tSize\t".implode( "\t", $props["retrieve"] )."\n";
+function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 
+	if ( array_key_exists( "wikiformat", $props ) ) {
+		if ( $props["wikiformat"] ) {
+			$username = "{{u|".$username."}}";
+		}
+	}
+	
 	foreach ( $pages as $page => $struct ) {
+	
+		$sumVal = 0;
 		
 		$print = 0;
 		if ( array_key_exists( "size", $props ) ) {
@@ -554,9 +686,19 @@ function printAll( $pages, $retrieve, $result, $props ) {
 				continue;
 			}
 			
+			if ( $sum ) {
+				$sumVal =+ $struct["size"];
+			
+			}
 		}
 		
-		if ( array_key_exists( $page, $retrieve["pagesQ"] ) ) {
+		$size = $struct["size"];
+			
+		if ( $sum ) {
+			$size = $sumVal;
+		}
+		
+		if ( $retrieve && array_key_exists( $page, $retrieve["pagesQ"] ) ) {
 			
 			$qid = $retrieve["pagesQ"][$page];
 
@@ -583,10 +725,26 @@ function printAll( $pages, $retrieve, $result, $props ) {
 			}
 			
 			if ( $print > 0 ) {
-			
-				echo $page."\t".$struct["size"]."\t".implode( "\t", $vals ), "\n";
+				
+				if ( array_key_exists( "wikiformat", $props ) ) {
+					if ( $props["wikiformat"] ) {
+						$page = "[[".$page."]]";
+					}
+				}
+				
+				echo $username."\t".$page."\t".$size."\t".implode( "\t", $vals ), "\n";
 
 			}
+		} else {
+
+			if ( array_key_exists( "wikiformat", $props ) ) {
+				if ( $props["wikiformat"] ) {
+					$page = "[[".$page."]]";
+				}
+			}
+			
+			echo $username."\t".$page."\t".$size."\n";
+			
 		}
 		
 		
