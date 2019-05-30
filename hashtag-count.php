@@ -9,6 +9,7 @@ use \Wikibase\Api as WbApi;
 use \Mediawiki\DataModel as MwDM;
 use \Wikibase\DataModel as WbDM;
 
+ini_set('memory_limit', '-1'); # Comment if not needed
 
 // Detect commandline args
 $conffile = 'config.json';
@@ -395,7 +396,7 @@ function applyFilterIn( $history, $filterin ) {
 					if ( is_array( $struct["parentrev"] ) && array_key_exists( "categories", $struct["parentrev"] ) ) {
 				
 						foreach ( $struct["parentrev"]["categories"] as $category ) {
-							
+						
 							preg_match( $catregex, $category, $matches );
 						
 							if ( count( $matches ) > 1 ) {

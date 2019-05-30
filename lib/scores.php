@@ -31,7 +31,7 @@ function assignScores( $count, $wpapi, $props ) {
 		}
 		
 	}
-	
+
 	foreach ( $count as $user => $pages ) {
 		
 		$scores[$user] = 0;
