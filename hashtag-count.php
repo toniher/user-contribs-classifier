@@ -63,7 +63,7 @@ $pages = array( );
 
 $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
-$rclimit = 5000;
+$rclimit = 1000;
 
 
 // Login
@@ -91,9 +91,17 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$params["rcnamespace"] = $props["namespace"];
 	}
 	
-	$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
-	//echo count( $pages )."\n";
-		
+	$pages = array();
+	
+	if ( array_key_exists( "web", $props ) && $props["web"] ) {
+	
+		$pages = retrieveHashTagWeb( $pages, $params, $props );
+	
+	} else {
+	
+		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
+	}
+	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
 	//var_dump( $history );
 	
@@ -101,6 +109,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	if ( array_key_exists( "filterin", $props ) ) {
 		$filterin = applyFilterIn( $history, $props["filterin"] );
 	}
+
 	//echo count( $filterin )."\n";
 	//
 	//$tal1 = array_keys( $pages );
@@ -110,6 +119,11 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	//var_dump( array_diff( $tal1, $tal2 ) );
 	//// var_dump( $filterin );
 	
+
+	if ( array_key_exists( "filterout", $props ) ) {
+		$history = applyFilterOut( $history, $props["filterout"] );
+	}
+
 	// Get users from tags
 	$users = retrieveUsers( $pages );
 	// var_dump( $users );
@@ -121,13 +135,48 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
 		$scores = assignScores( $counts, $wpapi, $props );
-		// var_dump( $scores );
+		#var_dump( $scores );
 		
-		printScores( $scores, "wiki", $wpapi, $counts, $props["target"] );
+		printScores( $scores, "wiki", $wpapi, $counts, $props );
+
 	}
 
 	
 	
+}
+
+function retrieveHashTagWeb( $pages, $params, $props ) {
+	
+	
+	if ( array_key_exists( "tag", $props ) ) {
+		
+		$queryParams = array();
+		
+		$tag = $props["tag"];
+		$project = $props["web"];
+		
+		$startDate = assignDateWeb( $params, "startdate" );
+		$endDate = assignDateWeb( $params, "enddate" );
+
+		$queryParams["query"] = $tag;
+		$queryParams["project"] = $project;
+		$queryParams["startdate"] = $startDate;
+		if ( $endDate ) {
+			$queryParams["enddate"] = $endDate;
+		}
+		
+		// Perform query
+		$queryStr =  http_build_query( $queryParams );
+		
+		
+	}
+	
+	return $pages;
+}
+
+function assignDateWeb( $params, $key ) {
+	
+	return $date;
 }
 
 function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
@@ -135,6 +184,8 @@ function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
 	if ( $uccontinue ) {
 		$params["rccontinue"] = $uccontinue;
 	}
+	
+	// echo "*" .$uccontinue."\n";
 	
 	$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 
@@ -174,7 +225,7 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 	$batch = 5; // Batch to query, less API requests
 	$stack = array( );
 	
-	$rvlimit = 500;
+	$rvlimit = 2500;
 	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids" );
 	
 	
@@ -313,16 +364,23 @@ function processPages( $pages, $contribs, $props ) {
 		if ( array_key_exists( "title", $contrib ) ) {
 			
 			$title = strval( $contrib["title"] );
-			$comment = strval( $contrib["comment"] );
+			// echo $title, "\n";
+			
 			$user = strval( $contrib["user"] );
+			
+			if ( array_key_exists( "comment", $contrib ) ) {
+				
+				$comment = strval( $contrib["comment"] );
 	
-			if ( detectTag( $comment, $props["tag"] ) ) {
-		
-				if ( array_key_exists( $title, $pages ) ) {
-					array_push( $pages[$title], $user );
-				} else {
-					$pages[$title] = array( $user );
+				if ( detectTag( $comment, $props["tag"] ) ) {
+			
+					if ( array_key_exists( $title, $pages ) ) {
+						array_push( $pages[$title], $user );
+					} else {
+						$pages[$title] = array( $user );
+					}
 				}
+			
 			}
 		
 		}
@@ -413,6 +471,30 @@ function applyFilterIn( $history, $filterin ) {
 	
 	return $toinclude;
 	
+}
+
+function applyFilterOut( $history, $filterout ) {
+	
+	foreach ( $filterout as $filter ) {
+
+		if ( array_key_exists( "pages", $filter ) ) {
+
+			$pages = $filter["pages"];
+		
+			foreach( $history as $page => $struct ) {
+
+			
+				if ( in_array( $page, $pages ) ) {
+					unset( $history[$page] );
+				}
+			
+			}
+			
+		}
+	
+	}
+	
+	return $history;
 }
 
 function getCounts( $history, $users ) {

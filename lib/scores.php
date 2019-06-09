@@ -151,11 +151,46 @@ function printPags( $pags ) {
 	
 }
 
-function printScores( $scores, $mode="wiki", $wpapi, $counts, $target ) {
+function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
+	
+	$target = null;
+	$pagesout = [];
+	
+	if ( array_key_exists( "target", $props ) ) {
+		$target = $props["target"];
+	}
+	
+	$target = null;
+	
+	if ( array_key_exists( "filterout", $props ) ) {
+		
+		foreach ( $props["filterout"] as $filter ) {
+			if ( array_key_exists( "pages", $filter ) ) {
+				$pagesout = $filter["pages"];
+			}
+			
+		}
+	}
+	
 	
 	if ( $mode === "wiki" ) {
 
-		$string = "{| class='sortable mw-collapsible wikitable'
+		$string = "";
+	
+		if ( count( $pagesout ) > 0 ) {
+			$toprint =  array( );
+			
+			foreach ( $pagesout as $page ) {
+				array_push( $toprint, "[[".$page."]]" );
+			}
+			
+			var_dump( $toprint );
+			sort( $toprint );
+			
+			$string.= "EXCLUSIÓ: ". implode( ", ", $toprint )."\n\n";
+		}
+	
+		$string.= "{| class='sortable mw-collapsible wikitable'
 ! Participant !! Articles || Puntuació\n";
 		
 		foreach ( $scores as $user => $score ) {
