@@ -9,6 +9,8 @@ use \Wikibase\Api as WbApi;
 use \Mediawiki\DataModel as MwDM;
 use \Wikibase\DataModel as WbDM;
 
+use \League\Csv\Reader;
+
 ini_set('memory_limit', '-1'); # Comment if not needed
 
 // Detect commandline args
@@ -103,21 +105,11 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
-	//var_dump( $history );
 	
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
 		$filterin = applyFilterIn( $history, $props["filterin"] );
 	}
-
-	//echo count( $filterin )."\n";
-	//
-	//$tal1 = array_keys( $pages );
-	//$tal2 = array_keys( $filterin );
-	//sort( $tal1 );
-	//sort( $tal2 );
-	//var_dump( array_diff( $tal1, $tal2 ) );
-	//// var_dump( $filterin );
 	
 
 	if ( array_key_exists( "filterout", $props ) ) {
@@ -147,6 +139,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 
 function retrieveHashTagWeb( $pages, $params, $props ) {
 	
+	$pages = array( );
 	
 	if ( array_key_exists( "tag", $props ) ) {
 		
@@ -155,8 +148,12 @@ function retrieveHashTagWeb( $pages, $params, $props ) {
 		$tag = $props["tag"];
 		$project = $props["web"];
 		
-		$startDate = assignDateWeb( $params, "startdate" );
-		$endDate = assignDateWeb( $params, "enddate" );
+		if ( is_array( $tag ) ) {
+			$tag = $tag[0];
+		}
+		
+		$startDate = assignDateWeb( $props, "startdate" );
+		$endDate = assignDateWeb( $props, "enddate" );
 
 		$queryParams["query"] = $tag;
 		$queryParams["project"] = $project;
@@ -168,14 +165,85 @@ function retrieveHashTagWeb( $pages, $params, $props ) {
 		// Perform query
 		$queryStr =  http_build_query( $queryParams );
 		
+		$csvContent = file_get_contents( 'https://hashtags.wmflabs.org/csv/?'.$queryStr );
+		$reader = Reader::createFromString( $csvContent );
+		$reader->setDelimiter(",");
+		
+		$csvData = $reader->getRecords();
+		$pages = getWebPages( $csvData, $props );
+
+	}
+	
+	return $pages;
+}
+
+function getWebPages( $rows, $props ) {
+	
+	$pages = array( );
+	$startDate = $props["startdate"];
+	$endDate = $props["enddate"];
+	
+	foreach ( $rows as $row ) {
+
+		# Skip pages in user namespace
+
+		if ( preg_match ( "/^Usu\S{3,5}:/" , $row[3] ) === 1 ) {
+			continue;
+		}
+	
+		if ( compareDates( $row[1], $startDate, $endDate ) ) {
+
+			if ( ! array_key_exists( $row[3], $pages ) ) {
+					$pages[$row[3]] = array( );
+			}
+		
+			array_push( $pages[$row[3]], $row[2] );
+		}
 		
 	}
 	
 	return $pages;
 }
 
+
+function compareDates( $date, $startDate, $endDate ) {
+	
+	$out = false;
+	
+	if ( $startDate ) {
+		if ( $startDate <= $date ) {
+			$out = true;	
+		}
+	}
+	
+	if ( $endDate ) {
+		if ( $endDate < $date ) {
+			$out = false;	
+		}
+	}
+	
+	return $out;
+	
+}
+
 function assignDateWeb( $params, $key ) {
 	
+	$date = null;
+	
+	if ( array_key_exists( $key, $params ) ) {
+		
+		$preDateArr = explode( " ",  $params[$key] );
+		$date = $preDateArr[0];
+	}
+	
+	if ( $key == "startdate" ) {
+		$date = date('Y-m-d', strtotime($date. ' - 1 days'));
+	}
+	
+	if ( $key == "enddate" ) {
+		$date = date('Y-m-d', strtotime($date. ' + 1 days'));
+	}
+
 	return $date;
 }
 

@@ -160,7 +160,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 		$target = $props["target"];
 	}
 	
-	$target = null;
+	// $target = null;
 	
 	if ( array_key_exists( "filterout", $props ) ) {
 		
