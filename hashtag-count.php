@@ -104,6 +104,12 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 	}
 	
+	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
+	
+		$pages = filterOutNew( $pages, $wpapi, $props["startdate"] );
+	
+	}
+	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
 	
 	$filterin = null;
@@ -134,6 +140,47 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 
 	
+	
+}
+
+function filterOutNew( $pages, $wpapi, $startdate ) {
+	
+	$params = array( "prop" => "revisions", "rvlimit" => 1, "rvdir" => "newer", "rvprop" => "timestamp" );
+
+	foreach ( $pages as $page => $struct ) {
+		
+		$params["titles"] = $page;
+		$contribRequest = new Mwapi\SimpleRequest( 'query', $params  );
+
+		$outcome = $wpapi->postRequest( $contribRequest );
+
+		if ( array_key_exists( "query", $outcome ) ) {
+		
+			if ( array_key_exists( "pages", $outcome["query"] ) ) {
+	
+				foreach (  $outcome["query"]["pages"] as $key => $struct ) {
+					
+					if ( array_key_exists( "revisions", $struct ) ) {
+						
+						if ( array_key_exists( "timestamp", $struct["revisions"][0] ) ) {
+							
+							$timestamp = $struct["revisions"][0]["timestamp"];
+							
+							if ( strtotime( $timestamp ) >= strtotime( $startdate ) ) {
+								unset( $pages[$page] );
+							}
+						}
+					}
+					
+				}
+
+		
+			}
+		
+		}
+	}
+	
+	return $pages;
 	
 }
 
