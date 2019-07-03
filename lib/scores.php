@@ -38,7 +38,11 @@ function assignScores( $count, $wpapi, $props ) {
 		
 		foreach ( $pages as $page => $c ) {
 			
-			$scores[$user]+= assignScoreFromPage( $page, $c, $pagefilter, $scoresys );
+			$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys );
+			
+			// echo $user. " - ". $page." - ". $c . " - ".$scorePage."\n";
+			
+			$scores[$user]+= $scorePage;
 		}
 		
 	}

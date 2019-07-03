@@ -111,6 +111,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
+	// var_dump( $history );
 	
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
@@ -127,13 +128,14 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// var_dump( $users );
 	
 	// Get counting from users
+	// var_dump( $filterin );
 	$counts = getCounts( $history, $users, $filterin );
 	// var_dump( $counts );
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
 		$scores = assignScores( $counts, $wpapi, $props );
-		#var_dump( $scores );
+		// var_dump( $scores );
 		
 		printScores( $scores, "wiki", $wpapi, $counts, $props );
 
