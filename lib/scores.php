@@ -129,6 +129,8 @@ function processContentList( $content ) {
 			$line = str_replace( "[[", "", $line );
 			$line = str_replace( "]]", "", $line );
 			$line = str_replace( "*", "", $line );
+			$line = str_replace( "'''", "", $line );
+			$line = str_replace( "''", "", $line );
 			$line = trim( $line );
 
 			if ( $line !== "" ) {
