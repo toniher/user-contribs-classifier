@@ -11,15 +11,15 @@
   },
   "tasks": {
     "viquiestirada": {
-      "startdate": "2019-07-01 08:30:00",
-      "enddate": "2019-07-31 23:39:59",
+      "startdate": "2019-08-01 04:30:00",
+      "enddate": "2019-08-31 23:39:59",
       "namespace": 0,
       "tag": [
         "viquiestirada"
       ],
       "pagefilter": {
         "extrajune": {
-          "source": "Viquiprojecte:Viquiestirada/Juliol/Extra"
+          "source": "Viquiprojecte:Viquiestirada/Agost/Extra"
         }
       },
       "notnew": true,
@@ -45,7 +45,7 @@
           "sum": 1
         }
       },
-      "target": "Viquiprojecte:Viquiestirada/Juliol/Classificació"
+      "target": "Viquiprojecte:Viquiestirada/Agost/Classificació"
     }
   }
 }
