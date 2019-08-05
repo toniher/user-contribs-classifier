@@ -104,6 +104,11 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 	}
 	
+	if ( count( $pages ) == 0 ) {
+		# No pages, exit...
+		exit();
+	}
+	
 	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
 	
 		$pages = filterOutNew( $pages, $wpapi, $props["startdate"] );
