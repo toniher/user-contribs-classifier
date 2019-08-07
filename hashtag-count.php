@@ -103,7 +103,8 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 	}
-	
+
+	// var_dump( $pages );
 	if ( count( $pages ) == 0 ) {
 		# No pages, exit...
 		exit();
@@ -114,6 +115,8 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$pages = filterOutNew( $pages, $wpapi, $props["startdate"] );
 	
 	}
+	
+	// var_dump( $pages );
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
@@ -151,7 +154,9 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 }
 
 function filterOutNew( $pages, $wpapi, $startdate ) {
-	
+
+	// TODO: Handle redirects...
+
 	$params = array( "prop" => "revisions", "rvlimit" => 1, "rvdir" => "newer", "rvprop" => "timestamp" );
 
 	foreach ( $pages as $page => $struct ) {
