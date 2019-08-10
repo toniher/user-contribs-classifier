@@ -31,6 +31,11 @@
           "catregex": "\/sborrany\/"
         }
       ],
+      "filterout": [
+	          {
+			            "pages" : [ "Autobusos nocturns a l'Àmbit metropolità de Barcelona", "Metro de Sant Petersburg", "Centre de gravetat d'una aeronau", "Metro de Sant Petersburg", "Tacòmetre", "A9", "A-79", "Allunatge", "Metro de Moscou" ]
+			  }
+	  ],
       "scores": {
         "standard": {
           "min": 3000,
