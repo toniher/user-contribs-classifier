@@ -111,18 +111,22 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 	//exit();
 	
-	if ( array_key_exists( "store", $props ) && array_key_exists( "periodname", $props ) ) {
+	if ( array_key_exists( "store", $props ) ) {
 		
 		echo "Database!";
 		$database = new SQLite3($props['store']);
 
-		// create table if not exists `tags` ( page varchar(255), user varchar(255), count int(5), primary key (page, user), index count_idx( count ) ); 
+		$sqltable = "create table if not exists `tags` ( page varchar(255), user varchar(255), num int(5), primary key (page, user) ); ";
+		$database->exec( $sqltable );
 		
 		// Store in DB
-		// storeInDb( $database, $pages );
+		storeInDb( $database, $pages );
 		
 		// Retrieve from DB
-		// Here we retrieve from DB to $pages 
+		// Here we retrieve from DB to $pages
+		$pages = selectFromDb( $database );
+		//var_dump( $pages );
+		//exit();
 	}
 	
 	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
@@ -165,6 +169,113 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	}
 
 	
+	
+}
+
+function storeInDb( $database, $pages ) {
+	
+	$inserts = array();
+	
+	foreach ( $pages as $page => $users ) {
+		
+		if ( ! array_key_exists( $page, $inserts ) ) {
+			$inserts[ $page ] = array( );
+		}
+		
+		foreach ( $users as $user ) {
+			
+			if ( ! array_key_exists( $user, $inserts[$page] ) ) {
+				$inserts[ $page ][ $user ] = 1;
+			} else {
+				$inserts[ $page ][ $user ]++;
+			}
+			
+		}
+	}
+	
+	foreach ( $inserts as $page => $structUser ) {
+		
+		
+		foreach ( $structUser as $user => $count )  {
+			
+			// echo $page."\t".$user."\t".$count."\n";
+			
+			$sqlquery = " ";
+			$statement = $database->prepare('select num from `tags` where page = :page and user = :user ');
+			$statement->bindValue(':page', $page);
+			$statement->bindValue(':user', $user);
+			
+			$results = $statement->execute();
+			$rows = $results->fetchArray();
+						
+			if ( ! $rows ) {
+			
+				$statement = $database->prepare('insert into `tags` ( page, user, num ) values ( :page, :user, :num ) ');
+				$statement->bindValue(':page', $page);
+				$statement->bindValue(':user', $user);
+				$statement->bindValue(':num', $count);
+	
+				$results = $statement->execute();
+
+			} else {
+
+				if ( count( $rows ) > 0 ) {
+					
+					$preCount = $rows[0]["num"];
+					
+					if ( $preCount < $count ) {
+					
+						$statement = $database->prepare('update `tags` set num = :num where page = :page and user = :user  ');
+						$statement->bindValue(':page', $page);
+						$statement->bindValue(':user', $user);
+						$statement->bindValue(':num', $count);
+	
+						$results = $statement->execute();	
+						
+					}
+					
+				}
+			}
+			
+		}
+		
+	}
+	
+	return true;
+		
+}
+
+function selectFromDb( $database ) {
+	
+	$pages = array();
+
+	$sql = 'select page, user, num from `tags`';
+	
+	$result = $database->query($sql);
+	
+	while($res = $result->fetchArray(SQLITE3_ASSOC)){			
+			
+		if ( ! array_key_exists( $res['page'], $pages ) ) {
+			$pages[ $res['page'] ] = array( );
+		}
+		
+		if ( ! array_key_exists( $res['user'], $pages[ $res['page'] ] ) ) {
+			array_push( $pages[ $res['page'] ], $res['user'] );
+		}
+		
+		$count = $res['num'] - 1;
+		
+		for ( $c= 0; $c < $count; $c++ ) {
+			
+			array_push( $pages[ $res['page'] ], $res['user'] );
+	
+			
+		}
+			
+	}
+		
+	
+	return $pages;
 	
 }
 
