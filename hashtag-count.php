@@ -104,10 +104,25 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 	}
 
-	// var_dump( $pages );
+	var_dump( $pages );
 	if ( count( $pages ) == 0 ) {
 		# No pages, exit...
 		exit();
+	}
+	//exit();
+	
+	if ( array_key_exists( "store", $props ) && array_key_exists( "periodname", $props ) ) {
+		
+		echo "Database!";
+		$database = new SQLite3($props['store']);
+
+		// create table if not exists `tags` ( page varchar(255), user varchar(255), count int(5), primary key (page, user), index count_idx( count ) ); 
+		
+		// Store in DB
+		// storeInDb( $database, $pages );
+		
+		// Retrieve from DB
+		// Here we retrieve from DB to $pages 
 	}
 	
 	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
