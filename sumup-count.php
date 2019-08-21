@@ -90,10 +90,11 @@ if ( array_key_exists( "pages", $props ) ) {
 		$outcome = $wpapi->postRequest( $userContribRequest );
 		$text = getWikiText( $outcome );
 		$users = retrieveUsers( $wpapi, $text, $users );
+		
 		// var_dump( $users );
 	}
 	
-	var_dump( $users );
+	printTotal( $users, $mode="wiki", $wpapi, $props );
 
 	
 }
@@ -111,16 +112,16 @@ function retrieveUsers( $page, $text, $users ) {
 			if ( count( $parts) > 2 ) {
 				preg_match( "/\s*(\d+)\s*$/", trim( strip_tags( $parts[2] ) ), $match );
 				
-				echo strip_tags( $parts[2] )."\n";
-				var_dump( $match );
+				// echo strip_tags( $parts[2] )."\n";
+				// var_dump( $match );
 				$num = $match[0];
 				
-				var_dump( $parts[0]);
+				// var_dump( $parts[0]);
 				preg_match( "/\{\{Utot\|(\S.*?)\|/", trim( $parts[0] ), $matchu );
 	
 				$user = trim( $matchu[1] );
 				
-				echo $user."\t".$num."\n";
+				// echo $user."\t".$num."\n";
 				
 				if ( array_key_exists( $user, $users  ) ) {
 					
@@ -177,5 +178,67 @@ function getWikiText( $outcome ) {
 	}
 	
 	return $text;
+	
+}
+
+function printTotal( $scores, $mode="wiki", $wpapi, $props ) {
+	
+	// Sort by size
+	arsort( $scores );
+	
+	$target = null;
+	
+	if ( array_key_exists( "target", $props ) ) {
+		$target = $props["target"];
+	}
+	
+	if ( $mode === "wiki" ) {
+
+		$string = "";
+	
+		$string.= "{| class='sortable mw-collapsible wikitable'
+! Participant !!  Puntuació\n";
+		
+		foreach ( $scores as $user => $score ) {
+			
+			$string.= "|-\n";
+			$string.= "| {{Utot|". $user."|".$user."}} || ".$score."\n";
+		}
+		$string.= "|}";
+		
+		if ( $target && $wpapi ) {
+			
+			https://en.wikipedia.org/w/api.php?action=query&format=json&meta=tokens
+			$params = array( "meta" => "tokens" );
+			$getToken = new Mwapi\SimpleRequest( 'query', $params  );
+			$outcome = $wpapi->postRequest( $getToken );
+		
+			if ( array_key_exists( "query", $outcome ) ) {
+				if ( array_key_exists( "tokens", $outcome["query"] ) ) {
+					if ( array_key_exists( "csrftoken", $outcome["query"]["tokens"] ) ) {
+						
+						$token = $outcome["query"]["tokens"]["csrftoken"];
+						$params = array( "title" => $target, "summary" => "Viquiestirada", "text" => $string, "token" => $token );
+						$sendText = new Mwapi\SimpleRequest( 'edit', $params  );
+						$outcome = $wpapi->postRequest( $sendText );			
+					
+					}				
+				}
+			}
+
+		} else {
+			echo $string;
+		}
+		
+	} else {
+	
+		echo "Usuari\tPuntuació\n";
+		
+		foreach ( $scores as $user => $score ) {
+			
+			echo $user."\t".$score."\n";
+		}
+	
+	}
 	
 }
