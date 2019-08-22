@@ -121,14 +121,23 @@ function retrieveUsers( $page, $text, $users ) {
 	
 				$user = trim( $matchu[1] );
 				
+				preg_match_all( "/\[\[/" , trim( $parts[1] ), $matchc );
+				
+				$pages = 0;
+				
+				if ( count( $matchc ) > 0 ) {
+					
+					$pages = count( $matchc[0] );
+				}
+				
 				// echo $user."\t".$num."\n";
 				
 				if ( array_key_exists( $user, $users  ) ) {
 					
-					$users[$user] = $users[$user] + $num;
+					$users[$user] = array( "score" => $users[$user]["score"] + $num, "pages" => $users[$user]["pages"] + $pages );
 				} else {
 					
-					$users[$user] = $num;
+					$users[$user] = array( "score" => $num, "pages" => $pages );
 				}
 			
 			}
@@ -181,7 +190,15 @@ function getWikiText( $outcome ) {
 	
 }
 
-function printTotal( $scores, $mode="wiki", $wpapi, $props ) {
+function printTotal( $users, $mode="wiki", $wpapi, $props ) {
+	
+	$scores = array();
+	
+	foreach ( $users as $user => $struct ) {
+		
+		$scores[$user] = $struct["score"];
+		
+	}
 	
 	// Sort by size
 	arsort( $scores );
@@ -197,12 +214,12 @@ function printTotal( $scores, $mode="wiki", $wpapi, $props ) {
 		$string = "";
 	
 		$string.= "{| class='sortable mw-collapsible wikitable'
-! Participant !!  Puntuació\n";
+! Participant !! Núm pàgines !! Puntuació\n";
 		
 		foreach ( $scores as $user => $score ) {
 			
 			$string.= "|-\n";
-			$string.= "| {{Utot|". $user."|".$user."}} || ".$score."\n";
+			$string.= "| {{Utot|". $user."|".$user."}} || ". $users[$user]["pages"] . " || " .$score."\n";
 		}
 		$string.= "|}";
 		
@@ -232,11 +249,11 @@ function printTotal( $scores, $mode="wiki", $wpapi, $props ) {
 		
 	} else {
 	
-		echo "Usuari\tPuntuació\n";
+		echo "Usuari\tPàgines\tPuntuació\n";
 		
 		foreach ( $scores as $user => $score ) {
 			
-			echo $user."\t".$score."\n";
+			echo $user."\t".$users[$user]["pages"]."\t".$score."\n";
 		}
 	
 	}
