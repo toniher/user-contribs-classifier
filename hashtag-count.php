@@ -162,9 +162,12 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// var_dump( $users );
 	
 	// Get counting from users
+	// TODO: Provide extra counts: e. g., images and refs
+	
 	// var_dump( $filterin );
 	$counts = getCounts( $history, $users, $filterin );
 	// var_dump( $counts );
+	
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
@@ -738,6 +741,7 @@ function applyFilterIn( $history, $filterin ) {
 		}		
 	}
 	
+	// TO CHECK THIS
 	
 	return $toinclude;
 	
