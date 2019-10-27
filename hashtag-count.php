@@ -131,7 +131,13 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
 	
-		$pages = filterOutNew( $pages, $wpapi, $props["startdate"] );
+		$pages = filterInNew( $pages, $wpapi, $props["startdate"], false );
+	
+	}
+
+	if ( array_key_exists( "onlynew", $props ) && $props["onlynew"] ) {
+	
+		$pages = filterInNew( $pages, $wpapi, $props["startdate"], true );
 	
 	}
 	
@@ -280,7 +286,7 @@ function selectFromDb( $database ) {
 	
 }
 
-function filterOutNew( $pages, $wpapi, $startdate ) {
+function filterInNew( $pages, $wpapi, $startdate, $onlynew=false ) {
 
 	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => 1, "rvdir" => "newer", "rvprop" => "timestamp" );
 
@@ -303,8 +309,20 @@ function filterOutNew( $pages, $wpapi, $startdate ) {
 							
 							$timestamp = $struct["revisions"][0]["timestamp"];
 							
-							if ( strtotime( $timestamp ) >= strtotime( $startdate ) ) {
-								unset( $pages[$page] );
+							if ( ! $onlynew ) {
+							
+								# Remove new pages
+								if ( strtotime( $timestamp ) >= strtotime( $startdate ) ) {
+									unset( $pages[$page] );
+								}
+							
+							} else {
+							
+								# Remove old pages
+								if ( strtotime( $timestamp ) < strtotime( $startdate ) ) {
+									unset( $pages[$page] );
+								}
+								
 							}
 						}
 					}
