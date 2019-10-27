@@ -1,0 +1,52 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "xxx",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "xxx",
+    "password": "xxx"
+  },
+  "tasks": {
+    "viquiestirada": {
+      "startdate": "2019-10-01 08:30:00",
+      "enddate": "2019-10-31 23:39:59",
+      "namespace": 0,
+      "tag": [
+        "viquiestirada"
+      ],
+      "pagefilter": {
+        "extraoctober": {
+          "source": "Viquiprojecte:Viquiestirada/Octubre/Extra"
+        }
+      },
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/viquiestirada/sql/201910.db",
+      "notnew": true,
+      "filterin": [
+        {
+          "maxsize": 3000
+        },
+        {
+          "catregex": "\/sborrany\/"
+        }
+      ],
+      "scores": {
+        "standard": {
+          "min": 3000,
+          "minsum": 5,
+          "range": 1000,
+          "sum": 1
+        },
+        "extraoctober": {
+          "min": 10000,
+          "minsum": 35,
+          "range": 1000,
+          "sum": 1
+        }
+      },
+      "target": "Viquiprojecte:Viquiestirada/Octubre/Classificació"
+    }
+  }
+}

@@ -1,0 +1,52 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "xxx",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "xxx",
+    "password": "xxx"
+  },
+  "tasks": {
+    "viquiestirada": {
+      "startdate": "2019-09-01 04:30:00",
+      "enddate": "2019-09-30 23:39:59",
+      "namespace": 0,
+      "tag": [
+        "viquiestirada"
+      ],
+      "pagefilter": {
+        "extrajune": {
+          "source": "Viquiprojecte:Viquiestirada/Setembre/Extra"
+        }
+      },
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/viquiestirada/sql/201909.db",
+      "notnew": true,
+      "filterin": [
+        {
+          "maxsize": 3000
+        },
+        {
+          "catregex": "\/sborrany\/"
+        }
+      ],
+      "scores": {
+        "standard": {
+          "min": 3000,
+          "minsum": 5,
+          "range": 1000,
+          "sum": 1
+        },
+        "extrajune": {
+          "min": 10000,
+          "minsum": 35,
+          "range": 1000,
+          "sum": 1
+        }
+      },
+      "target": "Viquiprojecte:Viquiestirada/Setembre/Classificació"
+    }
+  }
+}
