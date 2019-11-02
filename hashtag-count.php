@@ -176,6 +176,12 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		
 		printScores( $scores, "wiki", $wpapi, $counts, $props );
 
+	} else {
+		
+		var_dump( $counts );
+		exit;
+		printScores( null, "wiki", $wpapi, $counts, $props );
+
 	}
 
 	
