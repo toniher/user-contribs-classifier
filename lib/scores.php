@@ -162,6 +162,8 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 	$target = null;
 	$pagesout = [];
 	
+	$totalBytes = [];
+	
 	if ( array_key_exists( "target", $props ) ) {
 		$target = $props["target"];
 	}
@@ -175,6 +177,19 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 				$pagesout = $filter["pages"];
 			}
 			
+		}
+	}
+	
+	if ( ! $scores ) {
+		
+		foreach( $counts as $user => $pages ) {
+			
+			$totalBytes[$user] = 0;
+			
+			foreach ( $pages as $page => $bytes ) {
+				
+				$totalBytes[$user] = $totalBytes[$user] + $bytes;
+			}
 		}
 	}
 	
@@ -196,15 +211,30 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 			$string.= "EXCLUSIÓ: ". implode( ", ", $toprint )."\n\n";
 		}
 	
-		$string.= "{| class='sortable mw-collapsible wikitable'
-! Participant !! Articles || Puntuació\n";
-		
-		foreach ( $scores as $user => $score ) {
+		if ( $score ) {
 			
-			$string.= "|-\n";
-			$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )." ||".$score."\n";
+			$string.= "{| class='sortable mw-collapsible wikitable'
+	! Participant !! Articles || Puntuació\n";
+			
+			foreach ( $scores as $user => $score ) {
+				
+				$string.= "|-\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )." ||".$score."\n";
+			}
+			$string.= "|}";
+			
+		} else {
+		
+			$string.= "{| class='sortable mw-collapsible wikitable'
+	! Participant !! Articles || Octets totals\n";
+			
+			foreach ( $counts as $user => $pages ) {
+				
+				$string.= "|-\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )." ||".$totalBytes[$user]."\n";
+			}
+			$string.= "|}";	
 		}
-		$string.= "|}";
 		
 		if ( $target && $wpapi ) {
 			
@@ -232,11 +262,15 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 		
 	} else {
 	
-		echo "Usuari\tPuntuació\n";
-		
-		foreach ( $scores as $user => $score ) {
+		if ( $score ) {
+	
+			echo "Usuari\tPuntuació\n";
 			
-			echo $user."\t".$score."\n";
+			foreach ( $scores as $user => $score ) {
+				
+				echo $user."\t".$score."\n";
+			}
+		
 		}
 	
 	}
