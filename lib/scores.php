@@ -211,7 +211,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 			$string.= "EXCLUSIÓ: ". implode( ", ", $toprint )."\n\n";
 		}
 	
-		if ( $score ) {
+		if ( $scores ) {
 			
 			$string.= "{| class='sortable mw-collapsible wikitable'
 	! Participant !! Articles || Puntuació\n";
