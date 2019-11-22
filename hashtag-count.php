@@ -179,7 +179,6 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	} else {
 		
 		var_dump( $counts );
-		exit;
 		printScores( null, "wiki", $wpapi, $counts, $props );
 
 	}

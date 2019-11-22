@@ -164,6 +164,12 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 	
 	$totalBytes = [];
 	
+	$summary = "Viquiestirada";
+	
+	if ( array_key_exists( "summary", $props ) ) {
+		$summary = $props["summary"];
+	}
+	
 	if ( array_key_exists( "target", $props ) ) {
 		$target = $props["target"];
 	}
@@ -248,7 +254,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 					if ( array_key_exists( "csrftoken", $outcome["query"]["tokens"] ) ) {
 						
 						$token = $outcome["query"]["tokens"]["csrftoken"];
-						$params = array( "title" => $target, "summary" => "Viquiestirada", "text" => $string, "token" => $token );
+						$params = array( "title" => $target, "summary" => $summary, "text" => $string, "token" => $token );
 						$sendText = new Mwapi\SimpleRequest( 'edit', $params  );
 						$outcome = $wpapi->postRequest( $sendText );			
 					
