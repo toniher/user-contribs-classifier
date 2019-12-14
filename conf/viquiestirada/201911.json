@@ -1,0 +1,52 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "viquiestirada": {
+      "startdate": "2019-11-01 06:30:00",
+      "enddate": "2019-11-30 23:39:59",
+      "namespace": 0,
+      "tag": [
+        "viquiestirada"
+      ],
+      "pagefilter": {
+        "extranovember": {
+          "source": "Viquiprojecte:Viquiestirada/Novembre/Extra"
+        }
+      },
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/viquiestirada/sql/201911.db",
+      "notnew": true,
+      "filterin": [
+        {
+          "maxsize": 3000
+        },
+        {
+          "catregex": "\/sborrany\/"
+        }
+      ],
+      "scores": {
+        "standard": {
+          "min": 3000,
+          "minsum": 5,
+          "range": 1000,
+          "sum": 1
+        },
+        "extranovember": {
+          "min": 10000,
+          "minsum": 35,
+          "range": 1000,
+          "sum": 1
+        }
+      },
+      "target": "Viquiprojecte:Viquiestirada/Novembre/Classificació"
+    }
+  }
+}

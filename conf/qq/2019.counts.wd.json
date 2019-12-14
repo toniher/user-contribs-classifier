@@ -1,0 +1,26 @@
+{
+  "wikipedia": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "qq19": {
+      "startdate": "2019-12-15 23:30:00",
+      "enddate": "2019-12-31 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "QQ19",
+		"qq19"
+      ],
+	  "summary": "QQ19",
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/qq19/sql/2019.wd.db",
+      "target": "Viquipèdia:Gran_Quinzena_Anual_de_la_Qualitat/2019/Classificació/wikidata"
+    }
+  }
+}

@@ -1,0 +1,27 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "asianmonth": {
+      "startdate": "2019-11-01 00:01:00",
+      "enddate": "2019-12-07 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "AsianMonth",
+		"asianmonth"
+      ],
+	  "summary": "AsianMonth 2019",
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/asianmonth/sql/2019.db",
+      "onlynew": true,
+      "target": "Viquiprojecte:Asian Month/2019/Classificació"
+    }
+  }
+}
