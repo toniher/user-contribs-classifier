@@ -190,7 +190,13 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 		}
 	}
 	
-	if ( ! $scores ) {
+	$bytes = false;
+	
+	if ( array_key_exists( "bytes", $props ) && $props["bytes"] === true ) {
+		$bytes = true;
+	}
+	
+	if ( ! $scores || $bytes ) {
 		
 		foreach( $counts as $user => $pages ) {
 			
@@ -223,13 +229,23 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 	
 		if ( $scores ) {
 			
+			$bytesHead = "";
+			if ( $bytes ) {
+				$bytesHead = "!! Octets totals ";
+			}
+			
 			$string.= "{| class='sortable mw-collapsible wikitable'
-	! Participant !! Articles || Puntuació\n";
+	! Participant !! Articles $bytesHead!! Puntuació\n";
 			
 			foreach ( $scores as $user => $score ) {
 				
+				$bytesScore = "";
+				if ( $bytes ) {
+					$bytesScore = "|| ".$totalBytes[$user];
+				}
+			
 				$string.= "|-\n";
-				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )." ||".$score."\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$bytesScore ||".$score."\n";
 			}
 			$string.= "|}";
 			

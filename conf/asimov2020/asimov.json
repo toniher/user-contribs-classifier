@@ -23,6 +23,7 @@
           "new": true
         }
       },
+      "bytes": true,
       "store": "/home/toniher/Nextcloud/Documents/wikidata/asimov/2020.db",
       "checknew": true,
       "scores": {
