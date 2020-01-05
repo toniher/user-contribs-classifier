@@ -2,7 +2,7 @@
 
 use \Mediawiki\Api as MwApi;
 
-function assignScores( $count, $wpapi, $props ) {
+function assignScores( $count, $wpapi, $props, $newpages=[] ) {
 	
 	$scores = array();
 	$scoresys = array();
@@ -20,6 +20,10 @@ function assignScores( $count, $wpapi, $props ) {
 				
 				if ( array_key_exists( "source", $filter ) ) {
 					$pagefilter[$filterkey] = retrievePagesListFromSource( $filter["source"], $wpapi );
+				}
+				
+				if ( array_key_exists( "new", $filter ) ) {
+					$pagefilter[$filterkey] = array_keys( $newpages );
 				}
 			}
 			

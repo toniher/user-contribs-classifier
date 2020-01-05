@@ -1,0 +1,46 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "asimov": {
+      "startdate": "2020-01-02 00:00:00",
+      "enddate": "2020-01-15 00:00:00",
+      "namespace": 0,
+      "tag": [
+        "asimov",
+        "Asimov"
+      ],
+      "pagefilter": {
+        "newpages": {
+          "new": true
+        }
+      },
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/asimov/2020.db",
+      "checknew": true,
+      "scores": {
+        "standard": {
+			"min": 0,
+			"minsum": 0,
+			"range": 1000,
+			"sum": 1
+        },
+        "newpages": {
+			"min": 3000,
+			"minsum": 3,
+			"range": 1000,
+			"sum": 1
+        }
+      },
+      "summary": "100 anys d'Asimov",
+      "target": "Viquiprojecte:Centenari_Asimov/Seguiment"
+    }
+  }
+}

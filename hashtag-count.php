@@ -62,6 +62,7 @@ if ( ! $taskname ) {
 }
 
 $pages = array( );
+$newpages = array( );
 
 $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
@@ -141,6 +142,12 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	}
 	
+	if ( array_key_exists( "checknew", $props ) && $props["checknew"] ) {
+	
+		$newpages = filterInNew( $pages, $wpapi, $props["startdate"], true, true );
+		var_dump( $newpages );
+	}
+	
 	// var_dump( $pages );
 	
 	$history = retrieveHistoryPages( $pages, $wpapi, $props );
@@ -171,7 +178,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
-		$scores = assignScores( $counts, $wpapi, $props );
+		$scores = assignScores( $counts, $wpapi, $props, $newpages );
 		// var_dump( $scores );
 		
 		printScores( $scores, "wiki", $wpapi, $counts, $props );
@@ -294,8 +301,11 @@ function selectFromDb( $database ) {
 	
 }
 
-function filterInNew( $pages, $wpapi, $startdate, $onlynew=false ) {
+function filterInNew( $pages, $wpapi, $startdate, $onlynew=false, $checknew=false ) {
 
+	$novelty = array( );
+	$newpages = array( );
+	
 	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => 1, "rvdir" => "newer", "rvprop" => "timestamp" );
 
 	foreach ( $pages as $page => $struct ) {
@@ -317,21 +327,36 @@ function filterInNew( $pages, $wpapi, $startdate, $onlynew=false ) {
 							
 							$timestamp = $struct["revisions"][0]["timestamp"];
 							
-							if ( ! $onlynew ) {
+							//if ( ! $onlynew ) {
+							//
+							//	# Remove new pages
+							//	if ( strtotime( $timestamp ) >= strtotime( $startdate ) ) {
+							//		if ( $checknew ) {
+							//			$newpages[$page] = 1;
+							//		} else {
+							//			unset( $pages[$page] );
+							//		}
+							//	}
+							//
+							//} else {
+							//
+							//	# Remove old pages
+							//	if ( strtotime( $timestamp ) < strtotime( $startdate ) ) {
+							//		if ( $checknew ) {
+							//			$newpages[$page] = 1;
+							//		} else {
+							//			unset( $pages[$page] );
+							//		}
+							//	}
+							//	
+							//}
 							
-								# Remove new pages
-								if ( strtotime( $timestamp ) >= strtotime( $startdate ) ) {
-									unset( $pages[$page] );
-								}
-							
+							if ( strtotime( $timestamp ) >= strtotime( $startdate ) ) {
+								$novelty[$page] = 1;
 							} else {
-							
-								# Remove old pages
-								if ( strtotime( $timestamp ) < strtotime( $startdate ) ) {
-									unset( $pages[$page] );
-								}
-								
+								$novelty[$page] = 0;
 							}
+
 						}
 					}
 					
@@ -343,8 +368,34 @@ function filterInNew( $pages, $wpapi, $startdate, $onlynew=false ) {
 		}
 	}
 	
-	return $pages;
+	foreach( $novelty as $page => $val ) {
+		
+		if ( $checknew ) {
+			
+			if ( $val > 0 ) {
+				$newpages[$page] = 1;
+			}
+			
+		} else {
+			
+			if ( ! $onlynew ) {
+				if ( $val > 0 ) {
+					unset( $pages[$page] );
+				}
+			} else {
+				if ( $val == 0 ) {
+					unset( $pages[$page] );
+				}
+			}
+		}
+
+	}
 	
+	if ( $checknew ) {
+		return $newpages;
+	} else {
+		return $pages;
+	}
 }
 
 function retrieveHashTagWeb( $pages, $params, $props ) {
