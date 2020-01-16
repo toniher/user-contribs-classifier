@@ -10,6 +10,8 @@ Tools for retrieving reports of users contributions
 
 # TODO
 
+* Document all options
+* Counting type of contributions (how many images, references, etc.)
 * Script for parsing CSV
 * Lumen application
 
