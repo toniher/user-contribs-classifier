@@ -161,7 +161,7 @@ function printPags( $pags ) {
 	
 }
 
-function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
+function printScores( $scores, $mode="wiki", $wpapi, $counts, $edits, $props ) {
 	
 	$target = null;
 	$pagesout = [];
@@ -191,10 +191,16 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 	}
 	
 	$bytes = false;
+	$numedits = false;
 	
 	if ( array_key_exists( "bytes", $props ) && $props["bytes"] === true ) {
 		$bytes = true;
 	}
+	
+	if ( array_key_exists( "numedits", $props ) && $props["numedits"] === true ) {
+		$numedits = true;
+	}
+	
 	
 	if ( ! $scores || $bytes ) {
 		
@@ -209,6 +215,15 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 		}
 	}
 	
+	$bytesHead = "";
+	if ( $bytes ) {
+		$bytesHead = "!! Octets totals ";
+	}
+	
+	$numeditsHead = "";
+	if ( $numedits ) {
+		$numeditsHead = "!! Nombre d'edicions ";
+	}
 	
 	if ( $mode === "wiki" ) {
 
@@ -228,36 +243,46 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $props ) {
 		}
 	
 		if ( $scores ) {
-			
-			$bytesHead = "";
-			if ( $bytes ) {
-				$bytesHead = "!! Octets totals ";
-			}
-			
+
 			$string.= "{| class='sortable mw-collapsible wikitable'
-	! Participant !! Articles $bytesHead!! Puntuació\n";
+	! Participant !! Articles $numeditsHead $bytesHead!! Puntuació\n";
 			
 			foreach ( $scores as $user => $score ) {
-				
+			
 				$bytesScore = "";
 				if ( $bytes ) {
 					$bytesScore = "|| ".$totalBytes[$user];
 				}
-			
+				
+				$numeditsScore = "";
+				if ( $numedits ) {
+					$numeditsScore = "|| ".$edits[$user];
+				}
+				
 				$string.= "|-\n";
-				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$bytesScore ||".$score."\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$numeditsScore $bytesScore ||".$score."\n";
 			}
 			$string.= "|}";
 			
 		} else {
 		
 			$string.= "{| class='sortable mw-collapsible wikitable'
-	! Participant !! Articles || Octets totals\n";
+	! Participant !! Articles $numeditsHead $bytesHead\n";
 			
 			foreach ( $counts as $user => $pages ) {
 				
+				$bytesScore = "";
+				if ( $bytes ) {
+					$bytesScore = "|| ".$totalBytes[$user];
+				}
+			
+				$numeditsScore = "";
+				if ( $numedits ) {
+					$numeditsScore = "|| ".$edits[$user];
+				}
+				
 				$string.= "|-\n";
-				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )." ||".$totalBytes[$user]."\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$numeditsScore $bytesScore "."\n";
 			}
 			$string.= "|}";	
 		}

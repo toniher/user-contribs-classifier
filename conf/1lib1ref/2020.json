@@ -1,0 +1,28 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "1lib1ref": {
+      "startdate": "2020-01-15 00:00:00",
+      "enddate": "2020-02-05 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "1lib1ref",
+	"1Lib1Ref"
+      ],
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/1lib1ref/2020/2020.db",
+      "bytes": true,
+      "numedits": true,
+      "summary": "1lib1ref",
+      "target": "Viquiprojecte:Bibliowikis/1Lib1Ref/2020/Seguiment"
+    }
+  }
+}

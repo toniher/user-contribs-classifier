@@ -145,7 +145,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	if ( array_key_exists( "checknew", $props ) && $props["checknew"] ) {
 	
 		$newpages = filterInNew( $pages, $wpapi, $props["startdate"], true, true );
-		var_dump( $newpages );
+		// var_dump( $newpages );
 	}
 	
 	// var_dump( $pages );
@@ -163,6 +163,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	if ( array_key_exists( "filterout", $props ) ) {
 		$history = applyFilterOut( $history, $props["filterout"] );
 	}
+	// var_dump( $history );
 
 	// Get users from tags
 	$users = retrieveUsers( $pages );
@@ -173,6 +174,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// var_dump( $filterin );
 	$counts = getCounts( $history, $users, $filterin );
+	$edits = getTotalNumEditions( $history, $users );
 	// var_dump( $counts );
 	
 	
@@ -181,12 +183,12 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$scores = assignScores( $counts, $wpapi, $props, $newpages );
 		// var_dump( $scores );
 		
-		printScores( $scores, "wiki", $wpapi, $counts, $props );
+		printScores( $scores, "wiki", $wpapi, $counts, $edits, $props );
 
 	} else {
 		
 		var_dump( $counts );
-		printScores( null, "wiki", $wpapi, $counts, $props );
+		printScores( null, "wiki", $wpapi, $counts, $edits, $props );
 
 	}
 
@@ -843,6 +845,32 @@ function getCounts( $history, $users ) {
 			if ( array_key_exists( $user, $contribs ) ) {
 				
 				$counts[$user][$page] = array_sum( $contribs[$user] );
+			
+			}
+			
+		}
+	}
+	
+	return( $counts );
+}
+
+
+function getTotalNumEditions( $history, $users ) {
+	
+	$counts = array();
+	
+	// Iterate by user
+	foreach ( $users as $user ) {
+		
+		$counts[$user] = 0;
+		
+		foreach ( $history as $page => $struct ) {
+			
+			$contribs = $struct["contribs"];
+			
+			if ( array_key_exists( $user, $contribs ) ) {
+				
+				$counts[$user] =  $counts[$user] + count( $contribs[$user] );
 			
 			}
 			
