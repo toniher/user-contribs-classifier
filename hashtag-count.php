@@ -567,6 +567,10 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 		$params["rvend"] = $props["enddate"];
 	}
 	
+	if ( array_key_exists( "checkcontent", $props ) && $props['checkcontent'] ) {
+		$params["rvprop"] = $params["rvprop"]."|content|comment";
+	}
+	
 	$s = 0;
 	
 	foreach( array_keys( $pages ) as $page ) {
