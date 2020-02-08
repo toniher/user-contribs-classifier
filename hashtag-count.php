@@ -450,7 +450,7 @@ function getWebPages( $rows, $props ) {
 
 		# Skip pages in user namespace
 
-		if ( preg_match ( "/^Usu\S{3,5}:/" , $row[3] ) === 1 ) {
+		if ( preg_match ( "/^Us\S{2,8}:/" , $row[3] ) === 1 ) {
 			continue;
 		}
 	
@@ -884,3 +884,16 @@ function getTotalNumEditions( $history, $users ) {
 	return( $counts );
 }
 
+/** Simple function for checking content of revision or comment **/
+function checkContent( $text, $patterns ) {
+	
+	$count = 0;
+	
+	foreach ( $patterns as $pattern ) {
+		
+		$count = $count + substr_count( $text, $pattern );
+	}
+	
+	return $count;
+	
+}
