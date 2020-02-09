@@ -567,7 +567,7 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 		$params["rvend"] = $props["enddate"];
 	}
 	
-	if ( array_key_exists( "checkcontent", $props ) && $props['checkcontent'] ) {
+	if ( array_key_exists( "checkcontent", $props ) ) {
 		$params["rvprop"] = $params["rvprop"]."|content|comment";
 	}
 	
@@ -579,7 +579,7 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 		$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 		$outcome = $wpapi->postRequest( $userContribRequest );
 	
-		list( $history, $elements ) = processHistory( $history, $elements, $wpapi, $outcome );
+		list( $history, $elements ) = processHistory( $history, $elements, $wpapi, $outcome, $props );
 
 	}
 	
@@ -587,7 +587,7 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 	
 }
 
-function processHistory( $history, $elements, $wpapi, $outcome ) {
+function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 	if ( array_key_exists( "query", $outcome ) ) {
 	
@@ -600,6 +600,9 @@ function processHistory( $history, $elements, $wpapi, $outcome ) {
 				$history[$title] = array();
 				$history[$title]["parentrev"] = null;
 				$history[$title]["contribs"] = array();
+				
+				$elements[$title] = array();
+				
 				$parentid = null;
 				$accsize = 0;
 				
@@ -665,6 +668,8 @@ function processHistory( $history, $elements, $wpapi, $outcome ) {
 							
 							$user = $revision["user"];
 							$size = $revision["size"];
+							$content = $revision["content"];
+							$comment = $revision["comment"];
 							
 							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
 							
@@ -675,6 +680,9 @@ function processHistory( $history, $elements, $wpapi, $outcome ) {
 							
 							$presize = $size;
 							
+							if ( array_key_exists( "checkcontent", $props ) ) {
+								$elements[$title][$user] = processCheckContent( $content, $props["checkcontent"] );
+							}							
 						}
 						
 					}
@@ -882,6 +890,20 @@ function getTotalNumEditions( $history, $users ) {
 	}
 	
 	return( $counts );
+}
+
+
+/** Process content types inside rev content, e.g., ref, img, etc. **/
+function processCheckContent( $content, $checkcontent ) {
+	
+	$elements = array();
+	
+	foreach ( $checkcontent as $key => $patterns ) {
+		
+		$elements[$key] = checkContent( $content, $patterns );
+		
+	}
+	return $elements;
 }
 
 /** Simple function for checking content of revision or comment **/
