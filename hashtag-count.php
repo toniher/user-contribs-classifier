@@ -150,7 +150,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// var_dump( $pages );
 	
-	$history = retrieveHistoryPages( $pages, $wpapi, $props );
+	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
 	// exit();
 	
@@ -553,8 +553,8 @@ function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
 function retrieveHistoryPages( $pages, $wpapi, $props ) {
 	
 	$history = array();
+	$elements = array();
 	$batch = 5; // Batch to query, less API requests
-	$stack = array( );
 	
 	$rvlimit = 2500;
 	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids" );
@@ -579,15 +579,15 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 		$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 		$outcome = $wpapi->postRequest( $userContribRequest );
 	
-		$history = processHistory( $history, $wpapi, $outcome );
+		list( $history, $elements ) = processHistory( $history, $elements, $wpapi, $outcome );
 
 	}
 	
-	return $history;
+	return array( $history, $elements );
 	
 }
 
-function processHistory( $history, $wpapi, $outcome ) {
+function processHistory( $history, $elements, $wpapi, $outcome ) {
 
 	if ( array_key_exists( "query", $outcome ) ) {
 	
@@ -687,7 +687,7 @@ function processHistory( $history, $wpapi, $outcome ) {
 	
 	}
 
-	return $history;
+	return array( $history, $elements );
 }
 
 
