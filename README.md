@@ -15,3 +15,12 @@ Tools for retrieving reports of users contributions
 * Script for parsing CSV
 * Lumen application
 
+* Streaming process
+
+    curl  https://stream.wikimedia.org/v2/stream/revision-create?since=2020-02-06T00:00:00Z |grep 'wikidata.org' | sed 's/^data: //g' | grep 'Distributed Game' 
+
+Force a timeout:
+
+https://superuser.com/questions/1493160/using-curl-to-download-a-web-stream
+
+
