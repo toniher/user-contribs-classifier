@@ -1,0 +1,35 @@
+{
+  "wikipedia": {
+    "url": "https://wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "capsulatemps": {
+      "startdate": "2020-02-06 00:00:00",
+      "enddate": "2020-31-12 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "The Distributed Game (46)",
+        "The Distributed Game (50)",
+        "The Distributed Game (53)",
+        "The Distributed Game (54)"
+      ],
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/capsulatemps/2020/cawiki.passatemps.db",
+      "bytes": true,
+      "numedits": true,
+      "summary": "Capsula del Temps tradicional",
+      "target": "Usuari:Toniher/Capsula_del_temps/Passatemps",
+      "checkcontent": {
+        "cites": [
+          "{{Ref"
+        ]
+      }
+    }
+  }
+}

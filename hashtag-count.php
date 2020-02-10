@@ -567,10 +567,6 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 		$params["rvend"] = $props["enddate"];
 	}
 	
-	if ( array_key_exists( "checkcontent", $props ) ) {
-		$params["rvprop"] = $params["rvprop"]."|content|comment";
-	}
-	
 	$s = 0;
 	
 	foreach( array_keys( $pages ) as $page ) {
@@ -668,8 +664,8 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 							
 							$user = $revision["user"];
 							$size = $revision["size"];
-							$content = $revision["content"];
-							$comment = $revision["comment"];
+							$revid = $revision["revid"];
+							$parentid = $revision["parentid"];
 							
 							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
 							
@@ -680,8 +676,22 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 							
 							$presize = $size;
 							
-							if ( array_key_exists( "checkcontent", $props ) ) {
-								$elements[$title][$user] = processCheckContent( $content, $props["checkcontent"] );
+							# Only if diff
+							if ( array_key_exists( "checkcontent", $props ) && $parentid > 0 ) {
+								
+								#https://ca.wikipedia.org/w/api.php?action=compare&torelative=next&fromrev=22684935&prop=diff
+								#Provide comparison
+								
+								$params = array( "torev" => $revid, "fromrev" => $parentid, "prop" => "diff" );
+								$userContribRequest = new Mwapi\SimpleRequest( 'compare', $params  );
+								$outcome = $wpapi->postRequest( $userContribRequest );
+								
+								if ( $outcome && array_key_exists( "compare", $outcome ) && array_key_exists( "*", $outcome["compare"] ) ) {
+									
+									$elements[$title][$user] = processCheckContent( parseMediaWikiDiff( $outcome["compare"]["*"] ), $props["checkcontent"] );
+									
+								}
+								
 							}							
 						}
 						
@@ -890,6 +900,18 @@ function getTotalNumEditions( $history, $users ) {
 	}
 	
 	return( $counts );
+}
+
+/** Function for parsing diff HTML from MediaWiki **/
+function parseMediaWikiDiff( $diffhtml ){
+	
+	$text = "";
+	// content to parse: diff-addedline <td class=\"diff-addedline\"><div>| [[Maria Teresa Casals i Rubio]]</div></td>
+	// TODO: Consider deletedline
+	// <ins class=\"diffchange diffchange-inline\">4t</ins>
+	// Consider: <del class=\"diffchange diffchange-inline\">4art</del>
+	
+	return $text;
 }
 
 
