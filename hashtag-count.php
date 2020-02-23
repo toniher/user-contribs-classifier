@@ -909,7 +909,7 @@ function getElementsCounts( $elements, $users ) {
 					$counts[$user][$page][$type] = 0 ;
 				}
 				
-				$counts[$user][$page][$type]+=$val;
+				$counts[$user][$page][$type] =+ $val;
 			}
 			
 		}
