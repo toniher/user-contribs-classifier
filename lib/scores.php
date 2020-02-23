@@ -2,7 +2,7 @@
 
 use \Mediawiki\Api as MwApi;
 
-function assignScores( $count, $wpapi, $props, $newpages=[] ) {
+function assignScores( $count, $elements_counts, $wpapi, $props, $newpages=[] ) {
 	
 	$scores = array();
 	$scoresys = array();
@@ -161,12 +161,17 @@ function printPags( $pags ) {
 	
 }
 
-function printScores( $scores, $mode="wiki", $wpapi, $counts, $edits, $props ) {
+function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, $edits, $props ) {
 	
 	$target = null;
 	$pagesout = [];
 	
 	$totalBytes = [];
+	
+	$elements = [];
+	if ( array_key_exists( "checkcontent", $props ) ) {
+		$elements = array_keys( $props["checkcontent"] );
+	}
 	
 	$summary = "Viquiestirada";
 	
@@ -225,6 +230,14 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $edits, $props ) {
 		$numeditsHead = "!! Nombre d'edicions ";
 	}
 	
+	$elementsHead = "";
+	if ( count( $elements ) > 0 ) {
+		
+		foreach ( $elements as $element ) {
+			$elementsHead.= "!! $element ";
+		}
+	}
+	
 	if ( $mode === "wiki" ) {
 
 		$string = "";
@@ -267,7 +280,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $edits, $props ) {
 		} else {
 		
 			$string.= "{| class='sortable mw-collapsible wikitable'
-	! Participant !! Articles $numeditsHead $bytesHead\n";
+	! Participant !! Articles $numeditsHead $bytesHead $elementsHead\n";
 			
 			foreach ( $counts as $user => $pages ) {
 				
@@ -281,8 +294,35 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $edits, $props ) {
 					$numeditsScore = "|| ".$edits[$user];
 				}
 				
+				$elementsScore = "";
+				foreach ( $elements as $element ) {
+										
+					if ( array_key_exists( $user, $elements_counts ) ) {
+						
+						$elcount = 0;
+						
+						foreach( $elements_counts[$user] as $page => $struct ) {
+							
+							if ( array_key_exists( $element, $struct ) ) {
+								
+								$elcount =+ $struct[ $element ];
+								
+							}
+							
+						}
+						
+						if ( $elcount > 0 ) {
+							
+							$elementsScore = "|| ". $elcount;
+							
+						}
+					}
+					
+				}
+				
+				
 				$string.= "|-\n";
-				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$numeditsScore $bytesScore "."\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$numeditsScore $bytesScore $elementsScore"."\n";
 			}
 			$string.= "|}";	
 		}

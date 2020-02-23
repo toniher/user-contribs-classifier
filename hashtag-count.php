@@ -153,7 +153,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
 	var_dump( $elements );
-	exit();
+	// exit();
 	
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
@@ -178,17 +178,18 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	$edits = getTotalNumEditions( $history, $users );
 	// var_dump( $counts );
 	
+	$elements_counts = getElementsCounts( $elements, $users );
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
-		$scores = assignScores( $counts, $wpapi, $props, $newpages );
+		$scores = assignScores( $counts, $elements_counts, $wpapi, $props, $newpages );
 		// var_dump( $scores );
 		
-		printScores( $scores, "wiki", $wpapi, $counts, $edits, $props );
+		printScores( $scores, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
 
 	} else {
 		var_dump( $counts );
-		printScores( null, "wiki", $wpapi, $counts, $edits, $props );
+		printScores( null, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
 
 	}
 
@@ -887,6 +888,35 @@ function getCounts( $history, $users ) {
 	return( $counts );
 }
 
+function getElementsCounts( $elements, $users ) {
+	
+	$counts = array();
+	
+	// Iterate by user
+	foreach ( $users as $user ) {
+		
+		$counts[$user] = array();
+		
+		foreach ( $elements as $page => $struct ) {
+			
+			if ( ! array_key_exists( $page, $counts[$user] ) ) {
+				$counts[$user][$page] = array();
+			}
+
+			foreach ( $struct as $type => $val ) {
+			
+				if ( ! array_key_exists( $type, $counts[$user][$page] ) ) {
+					$counts[$user][$page][$type] = 0 ;
+				}
+				
+				$counts[$user][$page][$type]+=$val;
+			}
+			
+		}
+	}
+	
+	return( $counts );
+}
 
 function getTotalNumEditions( $history, $users ) {
 	
@@ -957,8 +987,8 @@ function processCheckContent( $content, $checkcontent ) {
 function checkContent( $text, $patterns ) {
 	
 	$count = 0;
-	var_dump( $text );
-	var_dump( $patterns );
+	//var_dump( $text );
+	//var_dump( $patterns );
 
 	foreach ( $patterns as $pattern ) {
 		
