@@ -562,8 +562,19 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 	if ( array_key_exists( "startdate", $props ) ) {
 		$params["rvstart"] = $props["startdate"];
 	}
+	
+	// If history start date, preference
+	if ( array_key_exists( "hstartdate", $props ) ) {
+		$params["rvstart"] = $props["hstartdate"];
+	}	
+	
 	if ( array_key_exists( "enddate", $props ) ) {
 		$params["rvend"] = $props["enddate"];
+	}
+	
+	// If history end date, preference
+	if ( array_key_exists( "henddate", $props ) ) {
+		$params["rvend"] = $props["henddate"];
 	}
 	
 	$s = 0;
