@@ -917,6 +917,20 @@ function getTotalNumEditions( $history, $users ) {
 function parseMediaWikiDiff( $diffhtml ){
 	
 	$text = "";
+	
+	$lines = explode( "\n", $diffhtml );
+	
+	foreach ( $lines as $line ) {
+		
+		if ( preg_match( "/diff-addedline/", $line ) ) {
+			$text.= $line;
+		}
+		if ( preg_match( "/diffchange/", $line ) ) {
+			$text.= $line;
+		}
+		
+	}
+	
 	// content to parse: diff-addedline <td class=\"diff-addedline\"><div>| [[Maria Teresa Casals i Rubio]]</div></td>
 	// TODO: Consider deletedline
 	// <ins class=\"diffchange diffchange-inline\">4t</ins>
