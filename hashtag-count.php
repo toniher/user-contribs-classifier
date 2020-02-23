@@ -896,8 +896,10 @@ function getElementsCounts( $elements, $users ) {
 	
 	// Iterate by user
 	foreach ( $users as $user ) {
-		
-		$counts[$user] = array();
+				
+		if ( ! array_key_exists( $user, $counts) ) {
+			$counts[$user] = array();
+		}
 		
 		foreach ( $elements as $page => $struct ) {
 			
