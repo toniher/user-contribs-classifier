@@ -179,8 +179,8 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// var_dump( $counts );
 	
 	$elements_counts = getElementsCounts( $elements, $users );
-	echo "ELCOUNTS\n";
-	var_dump( $elements_counts );
+	//echo "ELCOUNTS\n";
+	//var_dump( $elements_counts );
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
@@ -700,10 +700,15 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 								$userContribRequest = new Mwapi\SimpleRequest( 'compare', $params  );
 								$outcome = $wpapi->postRequest( $userContribRequest );
 								
+								if ( ! array_key_exists( $user, $elements[$title] ) ) {
+									$elements[$title][$user] = array();
+								}
+								
 								if ( $outcome && array_key_exists( "compare", $outcome ) && array_key_exists( "*", $outcome["compare"] ) ) {
 									
-									$elements[$title][$user] = processCheckContent( parseMediaWikiDiff( $outcome["compare"]["*"] ), $props["checkcontent"] );
-									
+									$elements[$title][$user] = processCheckContent( $elements[$title][$user], parseMediaWikiDiff( $outcome["compare"]["*"] ), $props["checkcontent"] );
+									//echo "?? GLOBAL\n";
+									//var_dump( $elements );
 								}
 								
 							}							
@@ -902,12 +907,12 @@ function getElementsCounts( $elements, $users ) {
 		}
 		
 		foreach ( $elements as $page => $struct ) {
-			
-			if ( ! array_key_exists( $page, $counts[$user] ) ) {
-				$counts[$user][$page] = array();
-			}
 
 			if ( array_key_exists( $user, $struct ) ) {
+				
+				if ( ! array_key_exists( $page, $counts[$user] ) ) {
+					$counts[$user][$page] = array();
+				}
 			
 				foreach ( $struct[$user] as $type => $val ) {
 				
@@ -954,13 +959,13 @@ function getTotalNumEditions( $history, $users ) {
 function parseMediaWikiDiff( $diffhtml ){
 	
 	$text = "";
-	var_dump( $diffhtml );
+	//var_dump( $diffhtml );
 	$lines = explode( "\n", $diffhtml );
 	
 	foreach ( $lines as $line ) {
 		
 		if ( preg_match( "/diff-addedline/", $line ) ) {
-			$text.= $line;
+			$text.= $line."\n";
 		}
 		if ( preg_match( "/diffchange/", $line ) ) {
 			$text.= $line;
@@ -973,35 +978,71 @@ function parseMediaWikiDiff( $diffhtml ){
 	// <ins class=\"diffchange diffchange-inline\">4t</ins>
 	// Consider: <del class=\"diffchange diffchange-inline\">4art</del>
 	
+	//echo "**TAL\n";
+	//echo $text;
+	//echo "\n";
+	
 	return $text;
 }
 
 
 /** Process content types inside rev content, e.g., ref, img, etc. **/
-function processCheckContent( $content, $checkcontent ) {
+function processCheckContent( $prev, $content, $checkcontent ) {
 	
 	$elements = array();
 	
 	foreach ( $checkcontent as $key => $patterns ) {
 	
-		$elements[$key] = checkContent( $content, $patterns );
-		
+		if ( ! array_key_exists( $key, $elements ) ) {
+			$elements[$key] = 0;
+		}
+	
+		$elements[$key] = $elements[$key] + checkContent( $content, $patterns );
+	
+		if ( ! array_key_exists( $key, $prev ) ) {
+			$prev[ $key ] = $elements[$key];
+		} else {
+			$prev[ $key ] = $prev[ $key ] + $elements[$key];;
+		}
 	}
-	return $elements;
+	
+	
+	return $prev;
 }
 
 /** Simple function for checking content of revision or comment **/
 function checkContent( $text, $patterns ) {
 	
 	$count = 0;
-	//var_dump( $text );
-	//var_dump( $patterns );
 
-	foreach ( $patterns as $pattern ) {
+	$lines = explode( "\n", htmlspecialchars( $text ) );
+
+	foreach( $lines as $line ) {
+	
+		$p = 0;
 		
-		$count = $count + substr_count( $text, $pattern );
+		
+		foreach ( $patterns as $pattern ) {
+		
+			if ( $p == 0 ) {
+		
+				
+				if ( substr_count( $line, $pattern ) > 0 ) {
+					
+					echo "** LINE: ", $line, "\n";
+					echo "@ ", $pattern, "\n";
+
+					$count++;
+					$p++;
+					
+				}
+			
+			}
+		}
+	
 	}
 	
+	echo "-- COUNT: $count\n";
 	return $count;
 	
 }
