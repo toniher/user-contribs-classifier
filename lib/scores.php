@@ -305,17 +305,17 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 							
 							if ( array_key_exists( $element, $struct ) ) {
 								
-								$elcount =+ $struct[ $element ];
+								$elcount = $elcount + $struct[ $element ];
 								
 							}
 							
 						}
 						
-						if ( $elcount > 0 ) {
-							
-							$elementsScore = "|| ". $elcount;
-							
-						}
+
+					}
+					
+					if ( counts( $elements ) ) {
+						$elementsScore = "|| ". $elcount;
 					}
 					
 				}

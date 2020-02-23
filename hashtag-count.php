@@ -179,6 +179,8 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// var_dump( $counts );
 	
 	$elements_counts = getElementsCounts( $elements, $users );
+	echo "ELCOUNTS\n";
+	var_dump( $elements_counts );
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
