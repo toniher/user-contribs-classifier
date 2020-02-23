@@ -153,7 +153,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
 	var_dump( $elements );
-	//exit();
+	exit();
 	
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
@@ -917,7 +917,7 @@ function getTotalNumEditions( $history, $users ) {
 function parseMediaWikiDiff( $diffhtml ){
 	
 	$text = "";
-	
+	var_dump( $diffhtml );
 	$lines = explode( "\n", $diffhtml );
 	
 	foreach ( $lines as $line ) {
