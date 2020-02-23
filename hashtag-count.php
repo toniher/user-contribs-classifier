@@ -152,7 +152,8 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
-	// exit();
+	var_dump( $elements );
+	//exit();
 	
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
@@ -931,7 +932,7 @@ function processCheckContent( $content, $checkcontent ) {
 	$elements = array();
 	
 	foreach ( $checkcontent as $key => $patterns ) {
-		
+	
 		$elements[$key] = checkContent( $content, $patterns );
 		
 	}
@@ -942,7 +943,9 @@ function processCheckContent( $content, $checkcontent ) {
 function checkContent( $text, $patterns ) {
 	
 	$count = 0;
-	
+	var_dump( $text );
+	var_dump( $patterns );
+
 	foreach ( $patterns as $pattern ) {
 		
 		$count = $count + substr_count( $text, $pattern );
