@@ -903,15 +903,18 @@ function getElementsCounts( $elements, $users ) {
 				$counts[$user][$page] = array();
 			}
 
-			foreach ( $struct as $type => $val ) {
+			if ( array_key_exists( $user, $struct ) ) {
 			
-				if ( ! array_key_exists( $type, $counts[$user][$page] ) ) {
-					$counts[$user][$page][$type] = 0 ;
-				}
+				foreach ( $struct[$user] as $type => $val ) {
 				
-				$counts[$user][$page][$type] = $counts[$user][$page][$type] + $val;
-			}
+					if ( ! array_key_exists( $type, $counts[$user][$page] ) ) {
+						$counts[$user][$page][$type] = 0 ;
+					}
+					
+					$counts[$user][$page][$type] = $counts[$user][$page][$type] + $val;
+				}
 			
+			}
 		}
 	}
 	
