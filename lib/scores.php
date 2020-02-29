@@ -66,18 +66,22 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys ) {
 	$schema = "standard";
 	$score = 0;
 	
-	foreach( $pagefilter as $filter => $pages ) {
-		
-		if ( in_array( $page, $pages ) ) {
-			$schema = $filter;
+	if ( array_key_exists( $schema, $scoresys ) ) {
+	
+		foreach( $pagefilter as $filter => $pages ) {
+			
+			if ( in_array( $page, $pages ) ) {
+				$schema = $filter;
+			}
+			
 		}
 		
-	}
+		if ( $count >= $scoresys[$schema]["min"] ) {
+			$score = $scoresys[$schema]["minsum"];
+			
+			$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+		}
 	
-	if ( $count >= $scoresys[$schema]["min"] ) {
-		$score = $scoresys[$schema]["minsum"];
-		
-		$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
 	}
 	
 	return $score;
@@ -112,6 +116,7 @@ function assignScoreFromElements( $elements_count, $scoresys ) {
 		}
 		
 	}
+	
 	
 	return $score;
 	
@@ -315,8 +320,34 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 					$numeditsScore = "|| ".$edits[$user];
 				}
 				
+				$elementsScore = "";
+				foreach ( $elements as $element ) {
+										
+					if ( array_key_exists( $user, $elements_counts ) ) {
+						
+						$elcount = 0;
+						
+						foreach( $elements_counts[$user] as $page => $struct ) {
+							
+							if ( array_key_exists( $element, $struct ) ) {
+								
+								$elcount = $elcount + $struct[ $element ];
+								
+							}
+							
+						}
+						
+
+					}
+					
+					if ( count( $elements ) ) {
+						$elementsScore = $elementsScore . "|| ". $elcount;
+					}
+					
+				}
+				
 				$string.= "|-\n";
-				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$numeditsScore $bytesScore ||".$score."\n";
+				$string.= "| {{Utot|". $user."|".$user."}} || ".printPags( array_keys( $counts[$user] ) )."$numeditsScore $bytesScore $elementsScore ||".$score."\n";
 			}
 			$string.= "|}";
 			
