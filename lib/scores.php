@@ -173,6 +173,10 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 		$elements = array_keys( $props["checkcontent"] );
 	}
 	
+	if ( array_key_exists( "checkcomment", $props ) ) {
+		$elements = array_merge( $elements, array_keys( $props["checkcomment"] ) );
+	}
+	
 	$summary = "Viquiestirada";
 	
 	if ( array_key_exists( "summary", $props ) ) {
