@@ -713,8 +713,11 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 								
 								if ( $outcome && array_key_exists( "compare", $outcome ) && array_key_exists( "*", $outcome["compare"] ) ) {
 									
+									echo "?? GLOBAL\n";
+									echo "$user\n";
+									
 									$elements[$title][$user] = processCheckContent( $elements[$title][$user], parseMediaWikiDiff( $outcome["compare"]["*"] ), $props["checkcontent"] );
-									//echo "?? GLOBAL\n";
+
 									//var_dump( $elements );
 								}
 								
@@ -981,10 +984,13 @@ function parseMediaWikiDiff( $diffhtml ){
 		if ( preg_match( "/diff-addedline/", $line ) ) {
 			$text.= $line."\n";
 		}
-		if ( preg_match( "/diffchange/", $line ) ) {
-			$text.= $line;
-		}
+		else {
 		
+			if ( preg_match( "/diffchange/", $line ) ) {
+				$text.= $line;
+			}
+		}
+
 	}
 	
 	// content to parse: diff-addedline <td class=\"diff-addedline\"><div>| [[Maria Teresa Casals i Rubio]]</div></td>
@@ -1011,12 +1017,12 @@ function processCheckContent( $prev, $content, $checkcontent ) {
 			$elements[$key] = 0;
 		}
 	
-		$elements[$key] = $elements[$key] + checkContent( $content, $patterns );
+		$elements[$key] = checkContent( $content, $patterns );
 	
 		if ( ! array_key_exists( $key, $prev ) ) {
 			$prev[ $key ] = $elements[$key];
 		} else {
-			$prev[ $key ] = $prev[ $key ] + $elements[$key];;
+			$prev[ $key ] = $prev[ $key ] + $elements[$key];
 		}
 	}
 	
