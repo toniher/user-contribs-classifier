@@ -43,10 +43,16 @@ function assignScores( $count, $elements_counts, $wpapi, $props, $newpages=[] ) 
 		foreach ( $pages as $page => $c ) {
 			
 			$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys );
-			
 			// echo $user. " - ". $page." - ". $c . " - ".$scorePage."\n";
-			
 			$scores[$user]+= $scorePage;
+			
+		}
+		
+		if ( array_key_exists( $user, $elements_counts ) ) { 
+		
+			$scoreElement = assignScoreFromElements( $elements_counts[ $user ], $scoresys );
+			$scores[$user]+= $scoreElement;
+		
 		}
 		
 	}
@@ -72,6 +78,39 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys ) {
 		$score = $scoresys[$schema]["minsum"];
 		
 		$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+	}
+	
+	return $score;
+	
+}
+
+function assignScoreFromElements( $elements_count, $scoresys ) {
+	
+	$score = 0;
+	$count = array();
+	
+	foreach( $elements_count as $page => $struct ) {
+		
+		foreach( $struct as $schema => $val ) {
+		
+			$count[$schema] = $count[$schema] + $val;
+		
+		}
+			
+	}
+	
+	foreach( array_keys( $count ) as $schema ) {
+	
+		if ( array_key_exists( $schema, $scoresys ) ) {
+	
+			if ( $count[$schema] >= $scoresys[$schema]["min"] ) {
+				$score = $scoresys[$schema]["minsum"];
+				
+				$score+= floor( ( $count[$schema] - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+			}
+			
+		}
+		
 	}
 	
 	return $score;
