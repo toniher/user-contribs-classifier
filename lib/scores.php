@@ -102,7 +102,7 @@ function assignScoreFromElements( $elements_count, $scoresys ) {
 			if ( array_key_exists( $schema, $scoresys ) ) {
 	
 				if ( $count[$schema] >= $scoresys[$schema]["min"] ) {
-					$score = $scoresys[$schema]["minsum"];
+					//$score = $scoresys[$schema]["minsum"];
 					
 					$score+= floor( ( $count[$schema] - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
 				}
