@@ -99,24 +99,19 @@ function assignScoreFromElements( $elements_count, $scoresys ) {
 		
 			$count[$schema] = $count[$schema] + $val;
 		
-		}
-			
-	}
+			if ( array_key_exists( $schema, $scoresys ) ) {
 	
-	foreach( array_keys( $count ) as $schema ) {
-	
-		if ( array_key_exists( $schema, $scoresys ) ) {
-	
-			if ( $count[$schema] >= $scoresys[$schema]["min"] ) {
-				$score = $scoresys[$schema]["minsum"];
+				if ( $count[$schema] >= $scoresys[$schema]["min"] ) {
+					$score = $scoresys[$schema]["minsum"];
+					
+					$score+= floor( ( $count[$schema] - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+				}
 				
-				$score+= floor( ( $count[$schema] - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
 			}
-			
-		}
 		
+		}
+			
 	}
-	
 	
 	return $score;
 	
