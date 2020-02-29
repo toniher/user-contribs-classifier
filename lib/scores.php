@@ -306,7 +306,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 		if ( $scores ) {
 
 			$string.= "{| class='sortable mw-collapsible wikitable'
-	! Participant !! Articles $numeditsHead $bytesHead!! Puntuació\n";
+	! Participant !! Articles $numeditsHead $bytesHead $elementsHead!! Puntuació\n";
 			
 			foreach ( $scores as $user => $score ) {
 			
