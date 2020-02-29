@@ -581,6 +581,12 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 		$params["rvend"] = $props["henddate"];
 	}
 	
+	// If history end date, preference
+	if ( array_key_exists( "checkcomment", $props ) ) {
+		$params["rvprop"] = $params["rvprop"]."|comment";
+	}
+	
+	
 	$s = 0;
 	
 	foreach( array_keys( $pages ) as $page ) {
@@ -680,6 +686,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 							$size = $revision["size"];
 							$revid = $revision["revid"];
 							$parentid = $revision["parentid"];
+							$comment = $revision["comment"];
 							
 							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
 							
@@ -711,7 +718,14 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 									//var_dump( $elements );
 								}
 								
-							}							
+							}
+							
+							// Checking comment for /* Revisada */ o /* Validada */
+							if ( array_key_exists( "checkcomment", $props ) ) {
+								
+								$elements[$title][$user] = processCheckContent( $elements[$title][$user], $comment, $props["checkcomment"] );
+							}
+							
 						}
 						
 					}
