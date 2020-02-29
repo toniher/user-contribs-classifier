@@ -319,7 +319,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 					}
 					
 					if ( count( $elements ) ) {
-						$elementsScore = "|| ". $elcount;
+						$elementsScore = $elementsScore . "|| ". $elcount;
 					}
 					
 				}
