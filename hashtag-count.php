@@ -184,7 +184,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
-		$scores = assignScores( $counts, $elements_counts, $wpapi, $props, $newpages );
+		$scores = assignScores( $counts, $edits, $elements_counts, $wpapi, $props, $newpages );
 		// var_dump( $scores );
 		
 		printScores( $scores, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );

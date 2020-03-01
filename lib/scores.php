@@ -2,7 +2,7 @@
 
 use \Mediawiki\Api as MwApi;
 
-function assignScores( $count, $elements_counts, $wpapi, $props, $newpages=[] ) {
+function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpages=[] ) {
 	
 	$scores = array();
 	$scoresys = array();
@@ -42,9 +42,12 @@ function assignScores( $count, $elements_counts, $wpapi, $props, $newpages=[] ) 
 		
 		foreach ( $pages as $page => $c ) {
 			
-			$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys );
-			// echo $user. " - ". $page." - ". $c . " - ".$scorePage."\n";
-			$scores[$user]+= $scorePage;
+			if ( array_key_exists( "standard", $scoresys ) ) {
+			
+				$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys, "standard" );
+				$scores[$user]+= $scorePage;
+
+			}
 			
 		}
 		
@@ -57,13 +60,22 @@ function assignScores( $count, $elements_counts, $wpapi, $props, $newpages=[] ) 
 		
 	}
 	
+	foreach ( $edits as $user => $numedits ) {
+
+		if ( array_key_exists( "count", $scoresys ) ) {
+			
+			$scoreEdits = assignScoreFromEdits( $numedits, $scoresys, "count" );
+			$scores[$user]+= $scoreEdits;				
+		}
+	}
+	
+	
 	return $scores;
 	
 }
 
-function assignScoreFromPage( $page, $count, $pagefilter, $scoresys ) {
-	
-	$schema = "standard";
+function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $schema = "standard" ) {
+
 	$score = 0;
 	
 	if ( array_key_exists( $schema, $scoresys ) ) {
@@ -77,7 +89,7 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys ) {
 		}
 		
 		if ( $count >= $scoresys[$schema]["min"] ) {
-			$score = $scoresys[$schema]["minsum"];
+			$score+= $scoresys[$schema]["minsum"];
 			
 			$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
 		}
@@ -120,6 +132,24 @@ function assignScoreFromElements( $elements_count, $scoresys ) {
 	
 	return $score;
 	
+}
+
+function assignScoreFromEdits( $numedits, $scoresys, $schema = "count" ) {
+	
+	$score = 0;
+	
+	if ( array_key_exists( $schema, $scoresys ) ) {
+
+		if ( $numedits >= $scoresys[$schema]["min"] ) {
+			$score+= $scoresys[$schema]["minsum"];
+			
+			$score+= floor( ( $numedits - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+		}
+		
+	}
+	
+	return $score;
+
 }
 
 function retrievePagesListFromSource( $source, $wpapi ) {
