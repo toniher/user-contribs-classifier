@@ -185,7 +185,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
 		$scores = assignScores( $counts, $edits, $elements_counts, $wpapi, $props, $newpages );
-		// var_dump( $scores );
+		var_dump( $scores );
 		
 		printScores( $scores, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
 
@@ -980,7 +980,7 @@ function getTotalNumEditions( $history, $users ) {
 function parseMediaWikiDiff( $diffhtml ){
 	
 	$text = "";
-	//var_dump( $diffhtml );
+	// var_dump( $diffhtml );
 	$lines = explode( "\n", $diffhtml );
 	
 	foreach ( $lines as $line ) {
@@ -996,6 +996,9 @@ function parseMediaWikiDiff( $diffhtml ){
 		}
 
 	}
+	
+	// <td class="diff-addedline"><div>*<ins class="diffchange diffchange-inline">[[</ins>1930<ins class="diffchange diffchange-inline">]]</ins> -<ins class="diffchange diffchange-inline"> </ins>Thomasville, [[Geòrgia]], [[Estats Units]]: '''[[Joanne Woodward]]''', [[actriu]] estatunidenca guanyadora d'un [[Oscar a la millor actriu]] el [[1957]].</div></td>
+
 	
 	// content to parse: diff-addedline <td class=\"diff-addedline\"><div>| [[Maria Teresa Casals i Rubio]]</div></td>
 	// TODO: Consider deletedline
