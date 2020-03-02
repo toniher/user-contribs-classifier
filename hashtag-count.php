@@ -716,7 +716,10 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 									echo "?? GLOBAL\n";
 									echo "$user\n";
 									
-									$elements[$title][$user] = processCheckContent( $elements[$title][$user], parseMediaWikiDiff( $outcome["compare"]["*"] ), $props["checkcontent"] );
+									// TODO: Move iteration of $props["checkcontent"] here
+									$content = parseMediaWikiDiff( $outcome["compare"]["*"] );
+									
+									$elements[$title][$user] = processCheckContent( $elements[$title][$user], $content, $props["checkcontent"] );
 
 									//var_dump( $elements );
 								}
@@ -730,6 +733,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 									$elements[$title][$user] = array();
 								}
 								
+								// TODO: Move iteration of $props["checkcontent"] here
 								$elements[$title][$user] = processCheckContent( $elements[$title][$user], $comment, $props["checkcomment"] );
 							}
 							
@@ -977,7 +981,7 @@ function getTotalNumEditions( $history, $users ) {
 }
 
 /** Function for parsing diff HTML from MediaWiki **/
-function parseMediaWikiDiff( $diffhtml ){
+function parseMediaWikiDiff( $diffhtml, $mode="default" ){
 	
 	$text = "";
 	// var_dump( $diffhtml );
@@ -990,8 +994,14 @@ function parseMediaWikiDiff( $diffhtml ){
 		}
 		else {
 		
-			if ( preg_match( "/diffchange/", $line ) ) {
-				$text.= $line;
+			if ( $mode == "noins" ) {
+				if ( preg_match( "/diffchange/", $line ) && ! ( preg_match( "/ins class\=/", $line ) ) ) {
+					$text.= $line;
+				}
+			} else {
+				if ( preg_match( "/diffchange/", $line ) ) {
+					$text.= $line;
+				}
 			}
 		}
 
