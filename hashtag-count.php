@@ -749,7 +749,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 									$elements[$title][$user] = array();
 								}
 																
-								foreach ( $props["checkcontent"] as $key => $patterns ) {
+								foreach ( $props["checkcomment"] as $key => $patterns ) {
 
 									$elements[$title][$user] = processCheckContent( $elements[$title][$user], $comment, $key, $pattern );
 							
