@@ -1007,16 +1007,24 @@ function parseMediaWikiDiff( $diffhtml, $mode="default" ){
 	
 	foreach ( $lines as $line ) {
 		
-		if ( preg_match( "/diff-addedline/", $line ) ) {
-			$text.= $line."\n";
-		}
-		else {
-		
-			if ( $mode == "noins" ) {
-				if ( preg_match( "/diffchange/", $line ) && ! ( preg_match( "/ins class\=/", $line ) ) ) {
+		if ( $mode == "noins" ) {
+
+			if ( preg_match( "/diff-addedline/", $line ) && ! preg_match( "/ins class\=/", $line ) && ! preg_match( "/del class\=/", $line ) ) {
 					$text.= $line;
-				}
 			} else {
+		
+				if ( preg_match( "/diffchange/", $line ) && ! preg_match( "/ins class\=/", $line ) && ! preg_match( "/del class\=/", $line ) ) {
+						$text.= $line;
+				}
+			}
+			
+		} else {
+			if ( preg_match( "/diff-addedline/", $line ) ) {
+				
+				$text.= $line."\n";
+				
+			} else {
+				
 				if ( preg_match( "/diffchange/", $line ) ) {
 					$text.= $line;
 				}
