@@ -686,7 +686,13 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 							$size = $revision["size"];
 							$revid = $revision["revid"];
 							$parentid = $revision["parentid"];
-							$comment = $revision["comment"];
+							
+							$comment = null;
+							
+							if ( array_key_exists( "comment", $revision ) ) {
+							
+								$comment = $revision["comment"];
+							}
 							
 							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
 							
@@ -716,11 +722,21 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 									echo "?? GLOBAL\n";
 									echo "$user\n";
 									
-									// TODO: Move iteration of $props["checkcontent"] here
-									$content = parseMediaWikiDiff( $outcome["compare"]["*"] );
 									
-									$elements[$title][$user] = processCheckContent( $elements[$title][$user], $content, $props["checkcontent"] );
+									foreach ( $props["checkcontent"] as $key => $patterns ) {
 
+										$mode = "default";
+										
+										// Temporal hack
+										if ( $key === "efemèrides" ) {
+											$mode = "noins";	
+										}
+										
+										$content = parseMediaWikiDiff( $outcome["compare"]["*"], $mode );
+
+										$elements[$title][$user] = processCheckContent( $elements[$title][$user], $content, $key, $patterns );
+
+									}
 									//var_dump( $elements );
 								}
 								
@@ -732,11 +748,13 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 								if ( ! array_key_exists( $user, $elements[$title] ) ) {
 									$elements[$title][$user] = array();
 								}
-								
-								// TODO: Move iteration of $props["checkcontent"] here
-								$elements[$title][$user] = processCheckContent( $elements[$title][$user], $comment, $props["checkcomment"] );
-							}
+																
+								foreach ( $props["checkcontent"] as $key => $patterns ) {
+
+									$elements[$title][$user] = processCheckContent( $elements[$title][$user], $comment, $key, $pattern );
 							
+								}
+							}
 						}
 						
 					}
@@ -1024,23 +1042,20 @@ function parseMediaWikiDiff( $diffhtml, $mode="default" ){
 
 
 /** Process content types inside rev content, e.g., ref, img, etc. **/
-function processCheckContent( $prev, $content, $checkcontent ) {
+function processCheckContent( $prev, $content, $key, $patterns ) {
 	
 	$elements = array();
-	
-	foreach ( $checkcontent as $key => $patterns ) {
-	
-		if ( ! array_key_exists( $key, $elements ) ) {
-			$elements[$key] = 0;
-		}
-	
-		$elements[$key] = checkContent( $content, $patterns );
-	
-		if ( ! array_key_exists( $key, $prev ) ) {
-			$prev[ $key ] = $elements[$key];
-		} else {
-			$prev[ $key ] = $prev[ $key ] + $elements[$key];
-		}
+		
+	if ( ! array_key_exists( $key, $elements ) ) {
+		$elements[$key] = 0;
+	}
+
+	$elements[$key] = checkContent( $content, $patterns );
+
+	if ( ! array_key_exists( $key, $prev ) ) {
+		$prev[ $key ] = $elements[$key];
+	} else {
+		$prev[ $key ] = $prev[ $key ] + $elements[$key];
 	}
 	
 	
