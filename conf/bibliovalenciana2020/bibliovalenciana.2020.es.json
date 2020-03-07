@@ -1,0 +1,24 @@
+{
+	"wikipedia": {
+		"url": "https://es.wikipedia.org/w/api.php",
+		"user": "xxx",
+		"password": "xxx"
+	},
+	"wikidata": {
+		"url": "https://www.wikidata.org/w/api.php",
+		"user": "Catabot",
+		"password": "xxx"
+	},
+	"tasks": {
+		"biblioval": {
+			"startdate": "2020-03-07T08:00:00Z",
+			"enddate": "2020-03-07T16:00:00Z",
+			"namespace": 0,
+			"redirectmerge": true,
+			"wikiformat": true,
+			"newonly": false,
+			"size": 5,
+			"skip_startswith": "Rever"
+		}
+	}
+}
