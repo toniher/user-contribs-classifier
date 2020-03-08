@@ -685,14 +685,14 @@ function resolveQValue( $qval, $type="label", $lang="ca" ) {
 	// TODO To be improved
 	if ( $type === "label" ) {
 	
-		$query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
-		PREFIX wd: <http://www.wikidata.org/entity/> \
-		select  * \
-		where { \
-	        wd:$qval rdfs:label ?label . \
-		FILTER (langMatches( lang(?label), \"$lang\" ) ) \
-		} \ 
-		LIMIT 1";
+		$query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ".
+		"PREFIX wd: <http://www.wikidata.org/entity/> ".
+		"select  * ".
+		"where { ".
+	    "    wd:$qval rdfs:label ?label . ".
+		"FILTER (langMatches( lang(?label), \"$lang\" ) ) ".
+		"} ". 
+		"LIMIT 1";
 		
 		$url = "https://query.wikidata.org/sparql?query=".urlencode( $query );
 		
