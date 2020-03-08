@@ -87,14 +87,14 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 if ( array_key_exists( "retrieve", $props ) ) {
 
 	if ( $props["wikiformat"] ) {
-		echo "{|\n";
+		echo "{| class='wikitable sortable' \n";
 		echo "! Usuari !! Articles !! Octets !! ".implode( "\t", $props["retrieve"] )."\n";
 	} else {
 		echo "Usuari\tArticles\tOctets\t".implode( "\t", $props["retrieve"] )."\n";
 	}
 } else {
 	if ( $props["wikiformat"] ) {
-		echo "{|\n";
+		echo "{|  class='wikitable sortable'\n";
 		echo "! Usuari !! Articles !! Octets\n";
 	} else {
 		echo "Usuari\tArticles\tOctets\n";
