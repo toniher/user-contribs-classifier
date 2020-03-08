@@ -707,6 +707,11 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 			$size = $sumVal;
 		}
 		
+		$wikiprefix = "";
+		if ( $props["wikiprefix"] ) {
+			$wikiprefix = ":".$props["wikiprefix"].":";
+		}
+		
 		if ( $retrieve && array_key_exists( $page, $retrieve["pagesQ"] ) ) {
 			
 			$qid = $retrieve["pagesQ"][$page];
@@ -736,8 +741,10 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 			if ( $print > 0 ) {
 				
 				if ( array_key_exists( "wikiformat", $props ) ) {
+
+					
 					if ( $props["wikiformat"] ) {
-						$page = "[[".$page."]]";
+						$page = "[[".$wikiprefix.$page."|".$page."]]";
 					}
 				}
 				
@@ -752,7 +759,7 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 
 			if ( array_key_exists( "wikiformat", $props ) ) {
 				if ( $props["wikiformat"] ) {
-					$page = "[[".$page."]]";
+					$page = "[[".$wikiprefix.$page."|".$page."]]";
 				}
 			}
 			
