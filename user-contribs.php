@@ -709,21 +709,30 @@ function resolveQValue( $qval, $type="label", $lang="ca" ) {
 		$result = curl_exec($ch);
 		curl_close($ch);
 		
-		echo $result;
 		$obj = json_decode($result, true);
 		
 		if ( array_key_exists( "results", $obj ) ) {
 			
 			if ( array_key_exists( "bindings", $obj["results"] ) ) {
+
+				// Assuming only one;
+				foreach (  $obj["results"]["bindings"] as $binding ) {
 				
-				if ( array_key_exists( "label", $obj["results"]["bindings"] ) ) {
-					
-					if ( array_key_exists( "value", $obj["results"]["bindings"]["label"] ) ) {
-					
-						$output = $obj["results"]["bindings"]["label"]["value"];
-					
+					if ( array_key_exists( "label", $binding ) ) {
+						
+						if ( array_key_exists( "value", $binding["label"] ) ) {
+						
+							if ( ! $output ) {
+								$output = "";
+							} else {
+								$output.="; ";
+							}
+							$output.= $binding["label"]["value"];
+						
+						}
+						
 					}
-					
+				
 				}
 			}
 		}		
