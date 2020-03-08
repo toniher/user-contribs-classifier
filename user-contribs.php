@@ -88,14 +88,14 @@ if ( array_key_exists( "retrieve", $props ) ) {
 
 	if ( $props["wikiformat"] ) {
 		echo "{|\n";
-		echo "| Usuari || Articles || Octets || ".implode( "\t", $props["retrieve"] )."\n";
+		echo "! Usuari !! Articles !! Octets !! ".implode( "\t", $props["retrieve"] )."\n";
 	} else {
-		echo "{|\n";
-		echo "| Usuari || Articles ||Octets ||".implode( "\t", $props["retrieve"] )."\n";
+		echo "Usuari\tArticles\tOctets\t".implode( "\t", $props["retrieve"] )."\n";
 	}
 } else {
 	if ( $props["wikiformat"] ) {
-		echo "Usuari\tArticles\tOctets\n";
+		echo "{|\n";
+		echo "! Usuari !! Articles !! Octets\n";
 	} else {
 		echo "Usuari\tArticles\tOctets\n";
 	}
@@ -187,6 +187,10 @@ foreach( $userlist as $username ) {
 	
 	printAll( $pages, $retrieve, $result, $props, $username );
 
+}
+
+if ( $props["wikiformat"] ) {
+	echo "|}";
 }
 
 function redirectMerge( $pages, $wpapi ) {
@@ -749,7 +753,7 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 				}
 				
 				if ( $props["wikiformat"] ) {
-					echo "|\n";
+					echo "|-\n";
 					echo "| ".$username." || ".$page." || ".$size." || ".implode( "\t", $vals ), "\n";
 				} else {
 					echo $username."\t".$page."\t".$size."\t".implode( "\t", $vals ), "\n";
@@ -764,7 +768,7 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 			}
 			
 			if ( $props["wikiformat"] ) {
-				echo "|\n";
+				echo "|-\n";
 				echo "| ".$username." || ".$page." || ".$size."\n";
 			} else {
 				echo $username."\t".$page."\t".$size."\n";
