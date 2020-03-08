@@ -712,7 +712,7 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 		}
 		
 		$wikiprefix = "";
-		if ( $props["wikiprefix"] ) {
+		if ( array_key_exists( "wikiprefix", $props ) ) {
 			$wikiprefix = ":".$props["wikiprefix"].":";
 		}
 		
