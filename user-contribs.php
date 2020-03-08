@@ -696,19 +696,17 @@ function resolveQValue( $qval, $type="label", $lang="ca" ) {
 		
 		$url = "https://query.wikidata.org/sparql?query=".urlencode( $query );
 		
-		$ch = curl_init();
-		$headers = [
-			'Accept: application/json'
-		];
+		$options = array('http' =>
+			array(
+				'method'  => 'GET',
+				'header'  => 'Accept: application/json'
+			)
+		);
+
+		$context = stream_context_create( $options );
 		
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		curl_setopt($ch, CURLOPT_URL, $url );
-		$result = curl_exec($ch);
-		curl_close($ch);
+		$result = file_get_contents( $url, false, $context );
 		
-		echo $result;
 		$obj = json_decode($result, true);
 		
 		if ( array_key_exists( "results", $obj ) ) {
