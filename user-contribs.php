@@ -678,6 +678,54 @@ function processDataValue( $datavalue ) {
 	
 }
 
+function resolveQValue( $qval, $type="label", $lang="ca" ) {
+	
+	$output = null;
+	
+	// TODO To be fixed. URLencode and so..
+	if ( $type === "label" ) {
+	
+		$url = "https://query.wikidata.org/sparql?query=PREFIX%20rdfs%3A%20%3C";
+		$url .= "http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%20%0APREFIX%20wd%3A%20%3Chttp%3A%2F%2Fwww.wikidata.org%2Fentity%2F%3E%20%0Aselect%20%20*%0A";
+		$url .= "where%20%7B%0A%20%20%20%20%20%20%20%20wd%3A".$qval."%20rdfs%3Alabel%20%3Flabel%20.%0A%20%20FILTER%20";
+		$url .= "langMatches(%20lang(%3Flabel)%2C%20%22".$lang."%22%20)%20)%0A%20%20%20%20%20%20%7D%20%0ALIMIT%201";
+		
+		$ch = curl_init();
+		$headers = [
+			'Accept: application/json'
+		];
+		
+		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+		curl_setopt($ch, CURLOPT_URL, $url );
+		$result = curl_exec($ch);
+		curl_close($ch);
+		
+		
+		$obj = json_decode($result, true);
+		
+		if ( array_key_exists( "results", $obj ) ) {
+			
+			if ( array_key_exists( "bindings", $obj["results"] ) ) {
+				
+				if ( array_key_exists( "label", $obj["results"]["bindings"] ) ) {
+					
+					if ( array_key_exists( "value", $obj["results"]["bindings"]["label"] ) ) {
+					
+						$output = $obj["results"]["bindings"]["label"]["value"];
+					
+					}
+					
+				}
+			}
+		}		
+		
+	}
+	
+	return $output;
+}
+
 function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 
 	if ( array_key_exists( "wikiformat", $props ) ) {
@@ -689,6 +737,16 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 	foreach ( $pages as $page => $struct ) {
 	
 		$sumVal = 0;
+		
+		$pagelabel = $page;
+		if ( array_key_exists( "resolvepage", $props ) ) {
+			// To be improved;
+			$qval = resolveQValue( $page );
+			if ( $qval ) {
+				$pagelabel = $qval;
+			}
+			sleep( 1 );
+		}
 		
 		$print = 0;
 		if ( array_key_exists( "size", $props ) ) {
@@ -748,7 +806,7 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 
 					
 					if ( $props["wikiformat"] ) {
-						$page = "[[".$wikiprefix.$page."|".$page."]]";
+						$page = "[[".$wikiprefix.$page."|".$pagelabel."]]";
 					}
 				}
 				
@@ -763,7 +821,7 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 
 			if ( array_key_exists( "wikiformat", $props ) ) {
 				if ( $props["wikiformat"] ) {
-					$page = "[[".$wikiprefix.$page."|".$page."]]";
+					$page = "[[".$wikiprefix.$page."|".$pagelabel."]]";
 				}
 			}
 			
