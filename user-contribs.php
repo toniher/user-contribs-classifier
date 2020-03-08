@@ -682,13 +682,19 @@ function resolveQValue( $qval, $type="label", $lang="ca" ) {
 	
 	$output = null;
 	
-	// TODO To be fixed. URLencode and so..
+	// TODO To be improved
 	if ( $type === "label" ) {
 	
-		$url = "https://query.wikidata.org/sparql?query=PREFIX%20rdfs%3A%20%3C";
-		$url .= "http%3A%2F%2Fwww.w3.org%2F2000%2F01%2Frdf-schema%23%3E%20%0APREFIX%20wd%3A%20%3Chttp%3A%2F%2Fwww.wikidata.org%2Fentity%2F%3E%20%0Aselect%20%20*%0A";
-		$url .= "where%20%7B%0A%20%20%20%20%20%20%20%20wd%3A".$qval."%20rdfs%3Alabel%20%3Flabel%20.%0A%20%20FILTER%20";
-		$url .= "langMatches(%20lang(%3Flabel)%2C%20%22".$lang."%22%20)%20)%0A%20%20%20%20%20%20%7D%20%0ALIMIT%201";
+		$query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> \
+		PREFIX wd: <http://www.wikidata.org/entity/> \
+		select  * \
+		where { \
+	        wd:$qval rdfs:label ?label . \
+		FILTER (langMatches( lang(?label), \"$lang\" ) ) \
+		} \ 
+		LIMIT 1";
+		
+		$url = "https://query.wikidata.org/sparql?query=".urlencode( $query );
 		
 		$ch = curl_init();
 		$headers = [
@@ -702,7 +708,7 @@ function resolveQValue( $qval, $type="label", $lang="ca" ) {
 		$result = curl_exec($ch);
 		curl_close($ch);
 		
-		
+		echo $result;
 		$obj = json_decode($result, true);
 		
 		if ( array_key_exists( "results", $obj ) ) {
