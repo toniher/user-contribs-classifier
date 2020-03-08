@@ -1,6 +1,6 @@
 {
 	"wikipedia": {
-		"url": "https://www.wikidata.org/w/api.php",
+		"url": "https://an.wikipedia.org/w/api.php",
 		"user": "xxx",
 		"password": "xxx"
 	},
@@ -16,8 +16,7 @@
 			"namespace": 0,
 			"redirectmerge": true,
 			"wikiformat": true,
-			"wikiprefix": "d",
-			"resolvepage": true,
+			"wikiprefix": "an",
 			"newonly": false,
 			"size": 5,
 			"skip_startswith": "Rever"

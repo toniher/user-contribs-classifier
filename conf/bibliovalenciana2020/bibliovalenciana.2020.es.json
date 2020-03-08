@@ -16,6 +16,7 @@
 			"namespace": 0,
 			"redirectmerge": true,
 			"wikiformat": true,
+			"wikiprefix": "es",
 			"newonly": false,
 			"size": 5,
 			"skip_startswith": "Rever"
