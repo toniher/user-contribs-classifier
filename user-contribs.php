@@ -86,10 +86,19 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 # Base print
 if ( array_key_exists( "retrieve", $props ) ) {
 
-	echo "User\tPage\tSize\t".implode( "\t", $props["retrieve"] )."\n";
-
+	if ( $props["wikiformat"] ) {
+		echo "{|\n";
+		echo "| Usuari || Articles || Octets || ".implode( "\t", $props["retrieve"] )."\n";
+	} else {
+		echo "{|\n";
+		echo "| Usuari || Articles ||Octets ||".implode( "\t", $props["retrieve"] )."\n";
+	}
 } else {
-	echo "User\tPage\tSize\n";	
+	if ( $props["wikiformat"] ) {
+		echo "Usuari\tArticles\tOctets\n";
+	} else {
+		echo "Usuari\tArticles\tOctets\n";
+	}
 }
 
 $userlist = array( );
@@ -732,8 +741,12 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 					}
 				}
 				
-				echo $username."\t".$page."\t".$size."\t".implode( "\t", $vals ), "\n";
-
+				if ( $props["wikiformat"] ) {
+					echo "|\n";
+					echo "| ".$username." || ".$page." || ".$size." || ".implode( "\t", $vals ), "\n";
+				} else {
+					echo $username."\t".$page."\t".$size."\t".implode( "\t", $vals ), "\n";
+				}
 			}
 		} else {
 
@@ -743,8 +756,12 @@ function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
 				}
 			}
 			
-			echo $username."\t".$page."\t".$size."\n";
-			
+			if ( $props["wikiformat"] ) {
+				echo "|\n";
+				echo "| ".$username." || ".$page." || ".$size."\n";
+			} else {
+				echo $username."\t".$page."\t".$size."\n";
+			}
 		}
 		
 		
