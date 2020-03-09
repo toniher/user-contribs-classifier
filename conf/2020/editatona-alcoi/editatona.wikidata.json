@@ -1,0 +1,26 @@
+{
+	"wikipedia": {
+		"url": "https://www.wikidata.org/w/api.php",
+		"user": "xxx",
+		"password": "xxx"
+	},
+	"wikidata": {
+		"url": "https://www.wikidata.org/w/api.php",
+		"user": "Catabot",
+		"password": "xxx"
+	},
+	"tasks": {
+		"editatona": {
+			"startdate": "2020-03-07T09:00:00Z",
+			"enddate": "2020-03-07T16:00:00Z",
+			"namespace": 0,
+			"redirectmerge": true,
+			"wikiformat": true,
+			"wikiprefix": "d",
+			"resolvepage": true,
+			"newonly": false,
+			"size": 5,
+			"skip_startswith": "Rever"
+		}
+	}
+}
