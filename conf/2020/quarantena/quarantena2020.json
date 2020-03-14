@@ -1,0 +1,54 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "capsulatemps": {
+      "startdate": "2020-03-13 00:00:00",
+      "enddate": "2020-03-27 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "#quarantena"
+      ],
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/quarantena/2020/quarantena.2020.db",
+      "bytes": true,
+      "numedits": true,
+      "checknew": true,
+      "summary": "Contribucions Quarantena 2020",
+      "target": "Viquiprojecte:Quarantena/Contribucions",
+      "checkcontent": {
+        "cites": [
+          "{{Ref",
+          "{{ref"
+        ]
+      },      
+      "scores": {
+        "cites": {
+          "min": 0,
+          "minsum": 0,
+          "range": 1,
+          "sum": 0.5
+        },
+        "standard": {
+          "min": 0,
+          "minsum": 0,
+          "range": 1000,
+          "sum": 1
+        },
+        "newpages": {
+            "min": 3000,
+            "minsum": 3,
+            "range": 1000,
+            "sum": 1
+        }
+      }
+    }
+  }
+}
