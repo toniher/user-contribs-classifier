@@ -774,7 +774,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 													
 														if ( array_key_exists( "main", $revContent["slots"] ) ) {
 
-															$content = $revContent["slots"]["main"];
+															$content = $revContent["slots"]["main"]["*"];
 															
 															echo "?? GLOBAL\n";
 															echo "$user\n";
