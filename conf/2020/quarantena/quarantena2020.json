@@ -10,7 +10,7 @@
     "password": "xxx"
   },
   "tasks": {
-    "capsulatemps": {
+    "quarantena": {
       "startdate": "2020-03-13 00:00:00",
       "enddate": "2020-03-27 23:59:59",
       "namespace": 0,
