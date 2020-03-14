@@ -704,40 +704,103 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 							$presize = $size;
 							
 							# Only if diff
-							if ( array_key_exists( "checkcontent", $props ) && $parentid > 0 ) {
+							if ( array_key_exists( "checkcontent", $props ) ) {
 								
 								#https://ca.wikipedia.org/w/api.php?action=compare&torelative=next&fromrev=22684935&prop=diff
 								#Provide comparison
 								
-								$params = array( "torev" => $revid, "fromrev" => $parentid, "prop" => "diff" );
-								$userContribRequest = new Mwapi\SimpleRequest( 'compare', $params  );
-								$outcome = $wpapi->postRequest( $userContribRequest );
+								if ( $parentid > 0 ) {
 								
-								if ( ! array_key_exists( $user, $elements[$title] ) ) {
-									$elements[$title][$user] = array();
-								}
-								
-								if ( $outcome && array_key_exists( "compare", $outcome ) && array_key_exists( "*", $outcome["compare"] ) ) {
+									$params = array( "torev" => $revid, "fromrev" => $parentid, "prop" => "diff" );
+									$userContribRequest = new Mwapi\SimpleRequest( 'compare', $params  );
+									$outcome = $wpapi->postRequest( $userContribRequest );
 									
-									echo "?? GLOBAL\n";
-									echo "$user\n";
-									
-									
-									foreach ( $props["checkcontent"] as $key => $patterns ) {
-
-										$mode = "default";
-										
-										// Temporal hack
-										if ( $key === "efemèrides" ) {
-											$mode = "noins";	
-										}
-										
-										$content = parseMediaWikiDiff( $outcome["compare"]["*"], $mode );
-
-										$elements[$title][$user] = processCheckContent( $elements[$title][$user], $content, $key, $patterns );
-
+									if ( ! array_key_exists( $user, $elements[$title] ) ) {
+										$elements[$title][$user] = array();
 									}
-									//var_dump( $elements );
+									
+									if ( $outcome && array_key_exists( "compare", $outcome ) && array_key_exists( "*", $outcome["compare"] ) ) {
+										
+										echo "?? GLOBAL\n";
+										echo "$user\n";
+										
+										
+										foreach ( $props["checkcontent"] as $key => $patterns ) {
+	
+											$mode = "default";
+											
+											// Temporal hack
+											if ( $key === "efemèrides" ) {
+												$mode = "noins";	
+											}
+											
+											$content = parseMediaWikiDiff( $outcome["compare"]["*"], $mode );
+	
+											$elements[$title][$user] = processCheckContent( $elements[$title][$user], $content, $key, $patterns );
+	
+										}
+										//var_dump( $elements );
+									}
+								
+								} else {
+									
+									// https://ca.wikipedia.org/w/api.php?action=query&prop=revisions&revids=22894857&rvprop=content&rvslots=main
+									$params = array( "revids" => $revid, "prop" => "revisions", "rvprop" => "content", "rvslots" => "main" );
+									$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
+									$outcome = $wpapi->postRequest( $userContribRequest );
+									
+									if ( ! array_key_exists( $user, $elements[$title] ) ) {
+										$elements[$title][$user] = array();
+									}
+									
+									if ( $outcome && array_key_exists( "query", $outcome ) && array_key_exists( "pages", $outcome["query"] ) ) {
+										
+										$pagesQuery = array_keys( $outcome["query"]["pages"] );
+										
+										if ( count( $pagesQuery ) > 0 ) {
+										
+											$page = $pagesQuery[0];
+											
+											if ( array_key_exists( "revisions", $outcome["query"]["pages"][$page] ) ) {
+												
+												
+												$revs = $outcome["query"]["pages"][$page]["revisions"];
+												
+												if ( count( $revs ) > 0 ) {
+												
+													$revContent = $revs[0];
+													
+													if ( array_key_exists( "slots", $revContent ) ) {
+													
+														if ( array_key_exists( "main", $revContent["slots"] ) ) {
+
+															$content = $revContent["slots"]["main"];
+															
+															echo "?? GLOBAL\n";
+															echo "$user\n";
+															
+															
+															foreach ( $props["checkcontent"] as $key => $patterns ) {
+						
+																$mode = "default";
+																						
+																$elements[$title][$user] = processCheckContent( $elements[$title][$user], $content, $key, $patterns );
+						
+															}
+															//var_dump( $elements );
+														
+														}
+													}
+												
+												}
+											
+											}
+										
+										}
+									
+									}
+									
+									
 								}
 								
 							}
