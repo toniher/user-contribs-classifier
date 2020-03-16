@@ -1,0 +1,38 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "viquipedia19": {
+      "startdate": "2020-03-16 08:00:00",
+      "enddate": "2020-03-17 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "#Viquipèdia19",
+        "#viquipedia19",
+        "#Viquipedia19",
+        "#viquipèdia19"
+      ],
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/viquipedia19/2020/viquipedia19.db",
+      "bytes": true,
+      "numedits": true,
+      "summary": "Contribucions Viquipèdia 19 anys",
+      "target": "Viquipèdia:19_anys_de_la_Viquipèdia/Seguiment",
+      "checkcontent": {
+        "cites": [
+          "{{Ref",
+          "{{ref",
+          "{{cite",
+          "{{Cite"
+        ]
+      }
+    }
+  }
+}
