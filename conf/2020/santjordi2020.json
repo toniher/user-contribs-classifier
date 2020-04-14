@@ -1,0 +1,53 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "santjordi20": {
+      "startdate": "2020-04-13 00:00:00",
+      "enddate": "2020-04-23 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "#SantJordi20",
+		"#santjordi20",
+		"#Santjordi20",
+		"#santJordi20"
+      ],
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/santjordi.2020.db",
+      "bytes": true,
+      "newonly": true,
+      "numedits": true,
+      "summary": "Sant Jordi 2020",
+      "target": "Viquiprojecte:Sant_Jordi_2020/Seguiment",
+      "checkcontent": {
+        "referències": [
+          "{{Ref",
+          "{{ref",
+          "{{Cite",
+          "{{cite"
+        ]
+      },
+      "scores": {
+        "referències": {
+          "min": 1,
+          "minsum": 0,
+          "range": 1,
+          "sum": 0.5
+        },
+        "newpages": {
+          "min": 3000,
+          "minsum": 1,
+          "range": 1000,
+          "sum": 1
+        }
+      }
+    }
+  }
+}
