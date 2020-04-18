@@ -20,6 +20,7 @@
 		"#Santjordi20",
 		"#santJordi20"
       ],
+      "locale": "ca_ES.UTF-8",
       "store": "/home/toniher/Nextcloud/Documents/wikidata/santjordi.2020.db",
       "bytes": true,
       "newonly": true,
