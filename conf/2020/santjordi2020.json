@@ -41,7 +41,7 @@
           "range": 1,
           "sum": 0.5
         },
-        "newpages": {
+        "standard": {
           "min": 3000,
           "minsum": 1,
           "range": 1000,
