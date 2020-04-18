@@ -286,8 +286,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 
 	$locale = null;
 	if ( array_key_exists( "locale", $props ) ) {
-			setlocale( LC_ALL, $props["locale"] );
-		  $locale = localeconv();
+		$locale = $props["locale"];
 	}
 
 	if ( ! $scores || $bytes ) {
