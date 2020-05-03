@@ -1,0 +1,64 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "santjordi20": {
+      "startdate": "2020-05-04 00:00:00",
+      "enddate": "2020-05-10 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "#Còmic20",
+		"#comic20",
+		"#Comic20",
+		"#còmic20"
+      ],
+      "locale": "ca_ES.UTF-8",
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/comic.2020.db",
+      "bytes": true,
+      "newonly": true,
+      "numedits": true,
+      "summary": "Còmic 2020",
+      "target": "Viquiprojecte:Còmics_2020/Seguiment",
+      "checkcontent": {
+        "referències": [
+          "{{Ref",
+          "{{ref",
+          "{{Cite",
+          "{{cite"
+        ],
+        "imatges": [
+          "|thumb",
+          "|miniatura"
+        ]
+      },
+      "scores": {
+        "referències": {
+          "min": 1,
+          "minsum": 0,
+          "range": 1,
+          "sum": 0.5
+        },
+        "imatges": {
+          "min": 1,
+          "minsum": 5,
+          "range": 1,
+          "sum": 5
+        },
+        "standard": {
+          "min": 3000,
+          "minsum": 1,
+          "range": 1000,
+          "sum": 1
+        }
+      }
+    }
+  }
+}
