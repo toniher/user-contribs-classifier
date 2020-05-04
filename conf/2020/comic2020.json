@@ -47,8 +47,8 @@
           "sum": 0.5
         },
         "imatges": {
-          "min": 1,
-          "minsum": 5,
+          "min": 0,
+          "minsum": 0,
           "range": 1,
           "sum": 5
         },
