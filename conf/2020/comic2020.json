@@ -15,10 +15,10 @@
       "enddate": "2020-05-10 23:59:59",
       "namespace": 0,
       "tag": [
-        "#Còmic20",
-		"#comic20",
-		"#Comic20",
-		"#còmic20"
+        "#Còmics20",
+		"#comics20",
+		"#Comics20",
+		"#còmics20"
       ],
       "locale": "ca_ES.UTF-8",
       "store": "/home/toniher/Nextcloud/Documents/wikidata/comic.2020.db",

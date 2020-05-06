@@ -105,7 +105,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
 	}
 
-	// var_dump( $pages );
+	//var_dump( $pages );
 	if ( count( $pages ) == 0 ) {
 		# No pages, exit...
 		exit();
