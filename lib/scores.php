@@ -45,7 +45,7 @@ function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpag
 			if ( array_key_exists( "standard", $scoresys ) ) {
 
 				$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys, "standard" );
-				echo $page." ".$scorePage."\n";
+				#echo $page." ".$scorePage."\n";
 				$scores[$user]+= $scorePage;
 
 			}
@@ -85,11 +85,15 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $schema = "
 
 		foreach( $pagefilter as $filter => $pages ) {
 
+			#echo "FILTER: ".$filter."\n";
+
 			if ( in_array( $page, $pages ) ) {
 				$schema = $filter;
+				#echo "HUIS\n";
 			}
 
 			if ( $count >= $scoresys[$schema]["min"] ) {
+				#echo "MIN:".$scoresys[$schema]["minsum"]."\n";
 				$score+= $scoresys[$schema]["minsum"];
 
 				$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
