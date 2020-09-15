@@ -45,6 +45,7 @@ function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpag
 			if ( array_key_exists( "standard", $scoresys ) ) {
 
 				$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys, "standard" );
+				echo $page." ".$scorePage."\n";
 				$scores[$user]+= $scorePage;
 
 			}
@@ -53,6 +54,7 @@ function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpag
 
 		if ( array_key_exists( $user, $elements_counts ) ) {
 
+			# Assign score from elements such as biblio, images, etc.
 			$scoreElement = assignScoreFromElements( $elements_counts[ $user ], $scoresys );
 			$scores[$user]+= $scoreElement;
 
@@ -78,7 +80,8 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $schema = "
 
 	$score = 0;
 
-	if ( array_key_exists( $schema, $scoresys ) ) {
+	// Now it's either pagefilter or standard
+	if ( count( array_keys( $pagefilter ) ) > 0 ) {
 
 		foreach( $pagefilter as $filter => $pages ) {
 
@@ -86,12 +89,23 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $schema = "
 				$schema = $filter;
 			}
 
+			if ( $count >= $scoresys[$schema]["min"] ) {
+				$score+= $scoresys[$schema]["minsum"];
+
+				$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+			}
+
 		}
 
-		if ( $count >= $scoresys[$schema]["min"] ) {
-			$score+= $scoresys[$schema]["minsum"];
+	} else {
+		if ( array_key_exists( $schema, $scoresys ) ) {
 
-			$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+			if ( $count >= $scoresys[$schema]["min"] ) {
+				$score+= $scoresys[$schema]["minsum"];
+
+				$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+			}
+
 		}
 
 	}

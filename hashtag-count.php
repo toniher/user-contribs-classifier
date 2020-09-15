@@ -176,15 +176,18 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	// var_dump( $filterin );
 	$counts = getCounts( $history, $users, $filterin );
 	$edits = getTotalNumEditions( $history, $users );
-	// var_dump( $counts );
+	echo "COUNTS\n";
+	var_dump( $counts );
 
+	// Counts of Biblio, Images and so (aka elements)
 	$elements_counts = getElementsCounts( $elements, $users );
-	//echo "ELCOUNTS\n";
-	//var_dump( $elements_counts );
+	echo "ELCOUNTS\n";
+	var_dump( $elements_counts );
 
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
 		$scores = assignScores( $counts, $edits, $elements_counts, $wpapi, $props, $newpages );
+		echo "SCORES\n";
 		var_dump( $scores );
 
 		printScores( $scores, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
