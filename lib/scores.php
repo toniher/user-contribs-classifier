@@ -2,7 +2,7 @@
 
 use \Mediawiki\Api as MwApi;
 
-function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpages=[] ) {
+function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpages=[], $oldpages=[] ) {
 
 	$scores = array();
 	$scoresys = array();
@@ -25,6 +25,11 @@ function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpag
 				if ( array_key_exists( "new", $filter ) ) {
 					$pagefilter[$filterkey] = array_keys( $newpages );
 				}
+
+				if ( array_key_exists( "old", $filter ) ) {
+					$pagefilter[$filterkey] = array_keys( $oldpages );
+				}
+
 			}
 
 		}
@@ -44,13 +49,9 @@ function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpag
 
 		foreach ( $pages as $page => $c ) {
 
-			if ( array_key_exists( "standard", $scoresys ) ) {
-
-				$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys, "standard" );
-				echo $page." ".$scorePage."\n";
-				$scores[$user]+= $scorePage;
-
-			}
+			$scorePage = assignScoreFromPage( $page, $c, $pagefilter, $scoresys, "standard" );
+			echo $page." ".$scorePage."\n";
+			$scores[$user]+= $scorePage;
 
 		}
 
@@ -78,7 +79,7 @@ function assignScores( $count, $edits, $elements_counts, $wpapi, $props, $newpag
 
 }
 
-function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $schema = "standard" ) {
+function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $default = "standard" ) {
 
 	$score = 0;
 
@@ -96,28 +97,36 @@ function assignScoreFromPage( $page, $count, $pagefilter, $scoresys, $schema = "
 				continue;
 			}
 
-			if ( $count >= $scoresys[$schema]["min"] ) {
-				#echo "MIN:".$scoresys[$schema]["minsum"]."\n";
-				$score+= $scoresys[$schema]["minsum"];
+			if ( array_key_exists( $schema, $scoresys ) ) {
 
-				$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+				if ( $count >= $scoresys[$schema]["min"] ) {
+					#echo "MIN:".$scoresys[$schema]["minsum"]."\n";
+					$score+= $scoresys[$schema]["minsum"];
+
+					$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+				}
+
+				echo $filter.": ".$score."\n";
 			}
-
-			echo $filter.": ".$score."\n";
-		}
-
-	} else {
-		if ( array_key_exists( $schema, $scoresys ) ) {
-
-			if ( $count >= $scoresys[$schema]["min"] ) {
-				$score+= $scoresys[$schema]["minsum"];
-
-				$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
-			}
-
 		}
 
 	}
+
+	if ( array_key_exists( $default, $scoresys ) ) {
+
+		$schema = $default;
+
+		if ( $count >= $scoresys[$schema]["min"] ) {
+			$score+= $scoresys[$schema]["minsum"];
+
+			$score+= floor( ( $count - $scoresys[$schema]["min"] ) / $scoresys[$schema]["range"] ) * $scoresys[$schema]["sum"];
+		}
+
+		echo $default.": ".$score."\n";
+
+
+	}
+
 
 	return $score;
 

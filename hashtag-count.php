@@ -63,6 +63,7 @@ if ( ! $taskname ) {
 
 $pages = array( );
 $newpages = array( );
+$oldpages = array( );
 
 $wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
 
@@ -145,10 +146,25 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	if ( array_key_exists( "checknew", $props ) && $props["checknew"] ) {
 
 		$newpages = filterInNew( $pages, $wpapi, $props["startdate"], true, true );
-		// var_dump( $newpages );
 	}
 
-	// var_dump( $pages );
+	$arrpages = array_keys( $pages );
+	$arrnewpages = array_keys( $newpages );
+
+	if ( count( $arrpages ) > 0 ) {
+		foreach ( $arrpages as $page ) {
+			if ( in_array( $page, $arrnewpages ) ) {
+				continue;
+			} else {
+				$oldpages[$page] = 1;
+			}
+		}
+	}
+
+	echo "NEW\n";
+	var_dump( $newpages );
+	echo "OLD\n";
+	var_dump( $oldpages );
 
 	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
@@ -186,7 +202,7 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 
 	// Assign scores
 	if ( array_key_exists( "scores", $props ) ) {
-		$scores = assignScores( $counts, $edits, $elements_counts, $wpapi, $props, $newpages );
+		$scores = assignScores( $counts, $edits, $elements_counts, $wpapi, $props, $newpages, $oldpages );
 		echo "SCORES\n";
 		var_dump( $scores );
 
