@@ -1,0 +1,61 @@
+{
+  "wikipedia": {
+    "url": "https://ca.wikipedia.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "wikidata": {
+    "url": "https://www.wikidata.org/w/api.php",
+    "user": "Catabot",
+    "password": "xxx"
+  },
+  "tasks": {
+    "viquidones": {
+      "startdate": "2020-09-15 00:00:00",
+      "enddate": "2020-10-15 23:59:59",
+      "namespace": 0,
+      "tag": [
+        "#viquidones",
+        "#Viquidones"
+      ],
+      "locale": "ca_ES.UTF-8",
+      "store": "/home/toniher/Nextcloud/Documents/wikidata/viquidones.30000.db",
+      "bytes": true,
+      "checknew": true,
+      "numedits": true,
+      "pagefilter": {
+        "newpages": {
+          "new": true
+        },
+        "oldpages": {
+          "old": true
+        },
+        "destacats": {
+          "source": "Viquiprojecte:Viquidones/30000_dones/Destacats_Articles"
+        }
+      },
+      "summary": "Viquidones 30000",
+      "target": "Viquiprojecte:Viquidones/30000_dones/Participants",
+      "scores": {
+        "oldpages": {
+          "min": 1000,
+          "minsum": 1,
+          "range": 1000,
+          "sum": 1
+        },
+        "newpages": {
+            "min": 3000,
+            "minsum": 6,
+            "range": 1000,
+            "sum": 1
+        },
+        "destacats": {
+            "min": 3000,
+            "minsum": 3,
+            "range": 1000,
+            "sum": 0
+        }
+      }
+    }
+  }
+}
