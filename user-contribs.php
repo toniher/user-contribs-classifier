@@ -126,8 +126,8 @@ foreach( $userlist as $username ) {
 	$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => $uclimit, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
 
 	if ( array_key_exists( "namespace", $props ) ) {
-		if ( is_array( $props["namespace"] ) {
-			$params["ucnamespace"] = implode( "|", $props["namespace"] );
+		if ( is_array( $props["namespace"] ) ) {
+			$params["ucnamespace"] = implode('|', $props["namespace"]);
 		} else {
 			$params["ucnamespace"] = $props["namespace"];
 		}
