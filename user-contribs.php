@@ -188,6 +188,7 @@ foreach( $userlist as $username ) {
 	#$wpapi->logout();
 	#$wdapi->logout();
 
+	// TODO: In case of retrieving contribs from Wikidata, handling label or sitelink for clarity
 
 	printAll( $pages, $retrieve, $result, $props, $username );
 
