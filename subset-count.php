@@ -79,33 +79,24 @@ if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $w
 }
 
 // Get all pages with a certain tag
-if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $props ) ) {
+if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props ) ) {
 
-	#https://ca.wikipedia.org/w/api.php?action=query&list=recentchanges&rcprop=comment|user|title|timestamp|sizes|redirect
-
-	$params = array( "list" => "recentchanges", "rcprop" => "comment|title|user", "rclimit" => $rclimit, "rcdir" => "newer", "rcnamespace" => 0 );
+	$startdate = null;
+	$enddate = null;
 
 	if ( array_key_exists( "startdate", $props ) ) {
-		$params["rcstart"] = $props["startdate"];
-	}
-	if ( array_key_exists( "enddate", $props ) ) {
-		$params["rcend"] = $props["enddate"];
+		$startdate = $props["startdate"];
 	}
 
-	if ( array_key_exists( "namespace", $props ) ) {
-		$params["rcnamespace"] = $props["namespace"];
+	if ( array_key_exists( "enddate", $props ) ) {
+		$enddate = $props["enddate"];
 	}
 
 	$pages = array();
 
-	if ( array_key_exists( "web", $props ) && $props["web"] ) {
+	$database = new SQLite3($props['store']);
 
-		$pages = retrieveHashTagWeb( $pages, $params, $props );
-
-	} else {
-
-		$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
-	}
+	$pages = retrievePagesFromDb( $database, $props['query'], $startdate, $enddate );
 
 	//var_dump( $pages );
 	if ( count( $pages ) == 0 ) {
@@ -117,17 +108,13 @@ if ( array_key_exists( "tag", $props )  &&  array_key_exists( "startdate", $prop
 	if ( array_key_exists( "store", $props ) ) {
 
 		echo "Database!";
-		$database = new SQLite3($props['store']);
-
-		$sqltable = "create table if not exists `tags` ( page varchar(255), user varchar(255), num int(5), primary key (page, user) ); ";
-		$database->exec( $sqltable );
 
 		// Store in DB
-		storeHashInDb( $database, $pages );
+		storeInDb( $database, $pages );
 
 		// Retrieve from DB
 		// Here we retrieve from DB to $pages
-		$pages = selectHashFromDb( $database );
+		$pages = selectFromDb( $database );
 		//var_dump( $pages );
 		//exit();
 	}

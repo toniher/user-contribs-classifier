@@ -2,8 +2,15 @@
 
 use \Mediawiki\Api as MwApi;
 
+function retrievePagesFromDb( $database, $query, $startdate=null, $enddate=null ) {
 
-function storeInDb( $database, $pages ) {
+  $pages = array();
+
+  return $pages;
+}
+
+
+function storeHashInDb( $database, $pages ) {
 
 	$inserts = array();
 
@@ -76,7 +83,7 @@ function storeInDb( $database, $pages ) {
 
 }
 
-function selectFromDb( $database ) {
+function selectHashFromDb( $database ) {
 
 	$pages = array();
 
