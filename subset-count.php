@@ -105,20 +105,6 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 	}
 	//exit();
 
-	if ( array_key_exists( "store", $props ) ) {
-
-		echo "Database!";
-
-		// Store in DB
-		storeInDb( $database, $pages );
-
-		// Retrieve from DB
-		// Here we retrieve from DB to $pages
-		$pages = selectFromDb( $database );
-		//var_dump( $pages );
-		//exit();
-	}
-
 	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
 
 		$pages = filterInNew( $pages, $wpapi, $props["startdate"], false );

@@ -6,6 +6,23 @@ function retrievePagesFromDb( $database, $query, $startdate=null, $enddate=null 
 
   $pages = array();
 
+  $statement = $database->prepare($query);
+  if ( $startdate ) {
+    $statement->bindValue(':startdate', $page);
+  }
+  if ( $enddate ) {
+    $statement->bindValue(':enddate', $page);
+  }
+
+  $results = $statement->execute();
+  $rows = $results->fetchArray(SQLITE3_NUM);
+
+  if ( $rows ) {
+    foreach ( $rows as $row ) {
+      array_push( $pages, $row[0] );
+    }
+  }
+
   return $pages;
 }
 
