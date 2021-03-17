@@ -170,19 +170,26 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 	var_dump( $elements_counts );
 
 	// Assign scores
+	$total = array();
 	if ( array_key_exists( "scores", $props ) ) {
 		$scores = assignScores( $counts, $edits, $elements_counts, $wpapi, $props, $newpages, $oldpages );
 		echo "SCORES\n";
 		var_dump( $scores );
 
-		printScores( $scores, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
+		$total = printScores( $scores, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
+		// var_dump( $total );
 
 	} else {
 		var_dump( $counts );
-		printScores( null, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
-
+		$total = printScores( null, "wiki", $wpapi, $counts, $elements_counts, $edits, $props );
+		// var_dump( $total );
 	}
 
 
+	if ( array_key_exists( "totalstats", $props ) ) {
+		if ( count( $total ) > 0 ) {
+			uploadStats( $wpapi, $props, $total );
+		}
 
+	}
 }

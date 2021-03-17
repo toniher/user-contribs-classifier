@@ -270,6 +270,10 @@ function printPags( $pags ) {
 function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, $edits, $props ) {
 
 	$target = null;
+
+	$total = [];
+	$total['edits'] = 0;
+
 	$pagesout = [];
 
 	$totalBytes = [];
@@ -330,6 +334,10 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 			foreach ( $pages as $page => $bytes ) {
 
 				$totalBytes[$user] = $totalBytes[$user] + $bytes;
+				if ( ! array_key_exists( 'bytes', $total ) ) {
+					$total['bytes'] = 0;
+				}
+				$total['bytes'] = $total['bytes'] + $totalBytes[$user];
 			}
 		}
 	}
@@ -384,6 +392,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 				$numeditsScore = "";
 				if ( $numedits ) {
 					$numeditsScore = "|| ".$edits[$user];
+					$total['edits'] = $total['edits'] + $edits[$user];
 				}
 
 				$elementsScore = "";
@@ -408,6 +417,10 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 
 					if ( count( $elements ) ) {
 						$elementsScore = $elementsScore . "|| ". $elcount;
+						if ( ! array_key_exists( $element, $total ) ) {
+							$total[$element] = 0;
+						}
+						$total[$element] = $total[$element] + $elcount;
 					}
 
 				}
@@ -432,6 +445,7 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 				$numeditsScore = "";
 				if ( $numedits ) {
 					$numeditsScore = "|| ".$edits[$user];
+					$total['edits'] = $total['edits'] + $edits[$user];
 				}
 
 				$elementsScore = "";
@@ -456,6 +470,10 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 
 					if ( count( $elements ) ) {
 						$elementsScore = $elementsScore . "|| ". $elcount;
+						if ( ! array_key_exists( $element, $total ) ) {
+							$total[$element] = 0;
+						}
+						$total[$element] = $total[$element] + $elcount;
 					}
 
 				}
@@ -506,6 +524,43 @@ function printScores( $scores, $mode="wiki", $wpapi, $counts, $elements_counts, 
 
 	}
 
+	return( $total );
+
+}
+
+function uploadStats( $wpapi, $props, $total ) {
+
+	$target = null;
+
+	if ( array_key_exists( "target", $props ) ) {
+		$target = $props["target"];
+	}
+
+	if ( $target && $wpapi ) {
+
+		foreach ( $total as $key => $value ) {
+
+			$params = array( "meta" => "tokens" );
+			$getToken = new Mwapi\SimpleRequest( 'query', $params );
+			$outcome = $wpapi->postRequest( $getToken );
+
+			if ( array_key_exists( "query", $outcome ) ) {
+				if ( array_key_exists( "tokens", $outcome["query"] ) ) {
+					if ( array_key_exists( "csrftoken", $outcome["query"]["tokens"] ) ) {
+
+						$token = $outcome["query"]["tokens"]["csrftoken"];
+						$params = array( "title" => $target."/".$key, "summary" => $summary, "text" => $value, "token" => $token );
+						$sendText = new Mwapi\SimpleRequest( 'edit', $params );
+						$outcome = $wpapi->postRequest( $sendText );
+
+					}
+				}
+			}
+		}
+
+	} else {
+		print_r($total);
+	}
 }
 
 function formatNumber( $number, $locale, $formatStyle=NumberFormatter::DECIMAL ){
