@@ -753,7 +753,7 @@ function retrieveUsersFromElements( $database, $elements, $bots=false ) {
 
 }
 
-function inspectUsers( $database, $users ) {
+function inspectUsers( $database, $wpapi, $users ) {
 
   $selected = array();
 
@@ -778,7 +778,7 @@ function inspectUsers( $database, $users ) {
     if ( array_key_exists( $user, $cache ) ) {
       $bot = $cache[$user];
     } else {
-      $bot = InspectAndAddUserToDb( $database, $user );
+      $bot = InspectAndAddUserToDb( $database, $wpapi, $user );
     }
 
     if ( $bot == 0 ) {
@@ -791,7 +791,7 @@ function inspectUsers( $database, $users ) {
 
 }
 
-function InspectAndAddUserToDb( $database, $user ) {
+function InspectAndAddUserToDb( $database, $wpapi, $user ) {
 
 
   $params = array( "list" => "users", "ususers" => $user, "usprop" => "groups");
