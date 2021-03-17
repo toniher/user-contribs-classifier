@@ -755,12 +755,73 @@ function retrieveUsersFromElements( $database, $elements, $bots=false ) {
 
 function inspectUsers( $database, $users ) {
 
-  //https://ca.wikipedia.org/w/api.php?action=query&list=users&ususers=Catabot&usprop=gender|rights
-
   $selected = array();
 
+  $sqltable = "create table if not exists `users` ( user varchar(255), bot integer(1), primary key (user), key `botidx` (bot) ); ";
+  $database->exec( $sqltable );
+
+
+  $cache = array();
+  $sqlselect = "select user, bot from users";
+
+  $statement = $database->prepare($sqlselect);
+	$results = $statement->execute();
+
+  while( $row = $results->fetchArray(SQLITE3_NUM) ) {
+    if ( count( $row ) > 0 ) {
+      $cache[$row[0]] = $row[1];
+    }
+  }
+
+  foreach ( $users as $user ) {
+    $bot = 0;
+    if ( array_key_exists( $user, $cache ) ) {
+      $bot = $cache[$user];
+    } else {
+      $bot = InspectAndAddUserToDb( $database, $user );
+    }
+
+    if ( $bot == 0 ) {
+      array_push( $selected, $user );
+    }
+
+  }
+
   return $selected;
-  
+
+}
+
+function InspectAndAddUserToDb( $database, $user ) {
+
+
+  $params = array( "list" => "users", "ususers" => $user, "usprop" => "groups");
+	$contribRequest = new Mwapi\SimpleRequest( 'query', $params  );
+	$outcome = $wpapi->postRequest( $contribRequest );
+
+  $bot = 0;
+
+	if ( array_key_exists( "query", $outcome ) ) {
+
+		if ( array_key_exists( "users", $outcome["query"] ) ) {
+
+			foreach (  $outcome["query"]["users"] as $user ) {
+
+        if ( in_array("bot", $user[$groups] ) ) {
+          $bot = 1;
+        }
+      }
+    }
+  }
+
+  $insert = "insert into `users` (`user`, `bot`) values( :user, :bot ) ";
+  $statement = $database->prepare( $insert );
+  $statement->bindValue(':user', $user);
+  $statement->bindValue(':bot', $bot);
+
+  $results = $statement->execute();
+
+  return $bot;
+
 }
 
 function applyFilterIn( $history, $filterin ) {

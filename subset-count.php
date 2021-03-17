@@ -142,7 +142,6 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props, "array" );
 	var_dump( $history );
 	var_dump( $elements );
-	exit();
 
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
@@ -157,6 +156,7 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 
 	// Get users from tags
 	$users = retrieveUsersFromElements( $database, $pages );
+	var_dump( $users );
 
 	// var_dump( $filterin );
 	$counts = getCounts( $history, $users, $filterin );
