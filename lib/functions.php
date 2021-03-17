@@ -8,20 +8,20 @@ function retrievePagesFromDb( $database, $query, $startdate=null, $enddate=null 
 
   $statement = $database->prepare($query);
   if ( $startdate ) {
-    $statement->bindValue(':startdate', $page);
+    $statement->bindValue(':startdate', $startdate);
   }
   if ( $enddate ) {
-    $statement->bindValue(':enddate', $page);
+    $statement->bindValue(':enddate', $enddate);
   }
 
   $results = $statement->execute();
-  $rows = $results->fetchArray(SQLITE3_NUM);
 
-  if ( $rows ) {
-    foreach ( $rows as $row ) {
-      array_push( $pages, $row[0] );
+  while( $row = $results->fetchArray(SQLITE3_NUM) ) {
+    if ( count( $row ) > 0 ) {
+      array_push( $pages, $row [0] );
     }
   }
+
 
   return $pages;
 }

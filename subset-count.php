@@ -98,12 +98,10 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 
 	$pages = retrievePagesFromDb( $database, $props['query'], $startdate, $enddate );
 
-	//var_dump( $pages );
 	if ( count( $pages ) == 0 ) {
 		# No pages, exit...
 		exit();
 	}
-	//exit();
 
 	if ( array_key_exists( "notnew", $props ) && $props["notnew"] ) {
 
@@ -135,10 +133,11 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 		}
 	}
 
-	echo "NEW\n";
-	var_dump( $newpages );
-	echo "OLD\n";
-	var_dump( $oldpages );
+	# echo "NEW\n";
+	# var_dump( $newpages );
+	# echo "OLD\n";
+	# var_dump( $oldpages );
+	exit;
 
 	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
 	// var_dump( $history );
