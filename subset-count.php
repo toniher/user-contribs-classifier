@@ -137,12 +137,12 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 	# var_dump( $newpages );
 	# echo "OLD\n";
 	# var_dump( $oldpages );
-	exit;
+	# exit;
 
-	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props );
-	// var_dump( $history );
+	list( $history, $elements ) = retrieveHistoryPages( $pages, $wpapi, $props, "array" );
+	var_dump( $history );
 	var_dump( $elements );
-	// exit();
+	exit();
 
 	$filterin = null;
 	if ( array_key_exists( "filterin", $props ) ) {
@@ -156,11 +156,7 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 	// var_dump( $history );
 
 	// Get users from tags
-	$users = retrieveUsers( $pages );
-	// var_dump( $users );
-
-	// Get counting from users
-	// TODO: Provide extra counts: e. g., images and refs
+	$users = retrieveUsersFromElements( $database, $pages );
 
 	// var_dump( $filterin );
 	$counts = getCounts( $history, $users, $filterin );

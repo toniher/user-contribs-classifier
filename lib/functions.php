@@ -381,11 +381,11 @@ function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
 
 }
 
-function retrieveHistoryPages( $pages, $wpapi, $props ) {
+function retrieveHistoryPages( $pages, $wpapi, $props, $mode=null ) {
 
 	$history = array();
 	$elements = array();
-	$batch = 5; // Batch to query, less API requests
+	$batch = 10; // Batch to query, less API requests
 
 	$rvlimit = 2500;
 	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids" );
@@ -417,13 +417,22 @@ function retrieveHistoryPages( $pages, $wpapi, $props ) {
 
 	$s = 0;
 
-	foreach( array_keys( $pages ) as $page ) {
+  $listpages = array();
+
+  if ( $mode == "array" ) {
+    $listpages = $pages;
+  } else {
+    $listpages = array_keys( $pages );
+  }
+
+	foreach( $listpages as $page ) {
 
 		$params["titles"] = $page;
 		$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 		$outcome = $wpapi->postRequest( $userContribRequest );
 
 		list( $history, $elements ) = processHistory( $history, $elements, $wpapi, $outcome, $props );
+    sleep(0.2);
 
 	}
 
@@ -721,6 +730,37 @@ function retrieveUsers( $pages ) {
 
 	return array_unique( $users );
 
+}
+
+function retrieveUsersFromElements( $database, $elements, $bots=false ) {
+
+  $users = array();
+
+  foreach ( $elements as $user => $part ) {
+
+    array_push( $users, $user );
+
+  }
+
+  $nusers = array_unique( $users );
+  sort( $nusers );
+
+  if ( ! $bots ) {
+    $nusers = inspectUsers( $database, $nusers );
+  }
+
+  return array_unique( $users );
+
+}
+
+function inspectUsers( $database, $users ) {
+
+  //https://ca.wikipedia.org/w/api.php?action=query&list=users&ususers=Catabot&usprop=gender|rights
+
+  $selected = array();
+
+  return $selected;
+  
 }
 
 function applyFilterIn( $history, $filterin ) {
