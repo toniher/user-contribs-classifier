@@ -732,24 +732,29 @@ function retrieveUsers( $pages ) {
 
 }
 
-function retrieveUsersFromElements( $database, $elements, $bots=false ) {
+function retrieveUsersFromElements( $database, $wpapi, $elements, $bots=false ) {
 
   $users = array();
 
-  foreach ( $elements as $user => $part ) {
+  foreach ( $elements as $page => $struct ) {
 
-    array_push( $users, $user );
+    foreach ( $struct as $user => $part ) {
+      array_push( $users, $user );
+    }
 
   }
 
   $nusers = array_unique( $users );
   sort( $nusers );
 
+  #echo "* NUSERS: ";
+  #var_dump( $nusers );
+
   if ( ! $bots ) {
-    $nusers = inspectUsers( $database, $nusers );
+    $nusers = inspectUsers( $database, $wpapi, $nusers );
   }
 
-  return array_unique( $users );
+  return array_unique( $nusers );
 
 }
 
@@ -774,6 +779,7 @@ function inspectUsers( $database, $wpapi, $users ) {
   }
 
   foreach ( $users as $user ) {
+    // echo "* ". $user."\n";
     $bot = 0;
     if ( array_key_exists( $user, $cache ) ) {
       $bot = $cache[$user];
@@ -798,17 +804,24 @@ function InspectAndAddUserToDb( $database, $wpapi, $user ) {
 	$contribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 	$outcome = $wpapi->postRequest( $contribRequest );
 
+  //var_dump( $outcome );
   $bot = 0;
 
 	if ( array_key_exists( "query", $outcome ) ) {
 
 		if ( array_key_exists( "users", $outcome["query"] ) ) {
 
-			foreach (  $outcome["query"]["users"] as $user ) {
+			foreach (  $outcome["query"]["users"] as $struct ) {
 
-        if ( in_array("bot", $user[$groups] ) ) {
+        if ( in_array("bot", $struct["groups"] ) ) {
           $bot = 1;
         }
+
+        // Regard IP as new group, bot 2. Not orthodox
+        if ( array_key_exists( "invalid", $struct ) ) {
+          $bot = 2;
+        }
+
       }
     }
   }
@@ -819,7 +832,7 @@ function InspectAndAddUserToDb( $database, $wpapi, $user ) {
   $statement->bindValue(':bot', $bot);
 
   $results = $statement->execute();
-
+  // var_dump( $results );
   return $bot;
 
 }

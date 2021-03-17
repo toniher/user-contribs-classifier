@@ -155,7 +155,7 @@ if ( array_key_exists( "store", $props )  &&  array_key_exists( "query", $props 
 	// var_dump( $history );
 
 	// Get users from tags
-	$users = retrieveUsersFromElements( $database, $wpapi, $pages );
+	$users = retrieveUsersFromElements( $database, $wpapi, $elements, false );
 	var_dump( $users );
 
 	// var_dump( $filterin );
