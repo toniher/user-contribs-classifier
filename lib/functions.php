@@ -757,7 +757,7 @@ function inspectUsers( $database, $users ) {
 
   $selected = array();
 
-  $sqltable = "create table if not exists `users` ( user varchar(255), bot integer(1), primary key (user), key `botidx` (bot) ); ";
+  $sqltable = "create table if not exists `users` ( user varchar(255), bot integer(1), primary key (user ) ) ; ";
   $database->exec( $sqltable );
 
 
