@@ -538,7 +538,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
                 foreach ( $props["skipcomment"] as $key => $patterns ) {
 
                   foreach ( $patterns as $pattern ) {
-                    if ( str_contains( $comment, $pattern ) ) {
+                    if ( strpos( $comment, $pattern ) !== false ) {
                       $skip = $skip + 1;
                     }
                   }
