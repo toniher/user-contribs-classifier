@@ -531,7 +531,23 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 								$comment = $revision["comment"];
 							}
 
-              // TODO: Check comment here. Skip if comments like rev
+              $skip = 0;
+              // Check comment here. Skip if comments like rev
+              if ( array_key_exists( "skipcomment", $props ) ) {
+
+                foreach ( $props["skipcomment"] as $key => $patterns ) {
+
+                  foreach ( $patterns as $pattern ) {
+                    if ( str_contains( $comment, $pattern ) ) {
+                      $skip = $skip + 1;
+                    }
+                  }
+                }
+              }
+
+              if ( $skip > 0 ) {
+                continue; // Let's move next revision
+              }
 
 							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
 
