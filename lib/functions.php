@@ -388,7 +388,7 @@ function retrieveHistoryPages( $pages, $wpapi, $props, $mode=null ) {
 	$batch = 10; // Batch to query, less API requests
 
 	$rvlimit = 2500;
-	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids" );
+	$params = array( "prop" => "revisions", "redirects" => true, "rvlimit" => $rvlimit, "rvdir" => "newer", "rvprop" => "user|size|ids|comment" );
 
 
 	if ( array_key_exists( "startdate", $props ) ) {
@@ -530,6 +530,8 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 								$comment = $revision["comment"];
 							}
+
+              // TODO: Check comment here. Skip if comments like rev
 
 							if ( ! array_key_exists( $user, $history[$title]["contribs"] ) ) {
 
