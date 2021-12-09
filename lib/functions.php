@@ -470,6 +470,9 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 							$parentid = $revisions[0]["parentid"];
 
+							# TODO: Handle removed / non-existing revision if a param
+							#https://ca.wikipedia.org/w/api.php?action=query&prop=revisions&revids=27289422&rvprop=content&rvslots=*
+							
 							# If page not created, proceed
 							if ( $parentid > 0 ) {
 
