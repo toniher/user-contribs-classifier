@@ -440,6 +440,45 @@ function retrieveHistoryPages( $pages, $wpapi, $props, $mode=null ) {
 
 }
 
+function checkDeletedRevid( $wpapi, $revid ) {
+
+  $deleted = false;
+
+  #https://ca.wikipedia.org/w/api.php?action=query&prop=revisions&revids=27289422&rvprop=content&rvslots=*
+  $params = array( "prop" => "revisions", "revids" => $revid, "rvprop" => "content", "rvslots" => "*" );
+  $checkRevid = new Mwapi\SimpleRequest( 'query', $params  );
+
+  $outcome = $wpapi->postRequest( $checkRevid );
+
+  if ( array_key_exists( "query", $outcome ) ) {
+
+    if ( array_key_exists( "pages", $outcome["query"] ) ) {
+
+      foreach ( $outcome["query"]["pages"] as $pageid => $struct ) {
+
+        if ( array_key_exists( "revisions", $struct ) ) {
+          if ( count( $struct["revisions"] ) > 0 ) {
+
+            $partstruct = $struct["revisions"][0];
+
+            if ( array_key_exists( "slots", $partstruct ) ) {
+              if ( array_key_exists( "main", $partstruct["slots"] ) ) {
+                if ( array_key_exists( "texthidden", $partstruct["slots"]["main"] ) ) {
+                  $deleted = true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  return $deleted;
+
+}
+
+
 function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 	if ( array_key_exists( "query", $outcome ) ) {
@@ -470,9 +509,6 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 							$parentid = $revisions[0]["parentid"];
 
-							# TODO: Handle removed / non-existing revision if a param
-							#https://ca.wikipedia.org/w/api.php?action=query&prop=revisions&revids=27289422&rvprop=content&rvslots=*
-							
 							# If page not created, proceed
 							if ( $parentid > 0 ) {
 
@@ -481,6 +517,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 								$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
 								$outcome = $wpapi->postRequest( $userContribRequest );
 
+                // TODO: Refactor here
 								if ( array_key_exists( "query", $outcome ) ) {
 
 									if ( array_key_exists( "pages", $outcome["query"] ) ) {
@@ -514,7 +551,6 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 								}
 
 							}
-
 						}
 
 						$presize = $accsize;
@@ -544,6 +580,16 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
                     if ( strpos( $comment, $pattern ) !== false ) {
                       $skip = $skip + 1;
                     }
+                  }
+                }
+              }
+
+              if ( array_key_exists( "checkrevid", $props ) ) {
+
+                if ( $props["checkrevid"] ) {
+                  $deleted = checkDeletedRevid( $wpapi, $revid );
+                  if ( $deleted ) {
+                    $skip = $skip + 1;
                   }
                 }
               }
