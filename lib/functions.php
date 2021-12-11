@@ -509,6 +509,18 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 							$parentid = $revisions[0]["parentid"];
 
+              // Let's check if parentid is deleted. So we skip it if needed
+              if ( array_key_exists( "checkrevid", $props ) ) {
+
+                if ( $props["checkrevid"] ) {
+                  $deleted = checkDeletedRevid( $wpapi, $parentid );
+                  if ( $deleted ) {
+                    echo "DELETED: $parentid\n";
+                    continue; // Let's move next page
+                  }
+                }
+              }
+
 							# If page not created, proceed
 							if ( $parentid > 0 ) {
 
@@ -589,6 +601,7 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
                 if ( $props["checkrevid"] ) {
                   $deleted = checkDeletedRevid( $wpapi, $revid );
                   if ( $deleted ) {
+                    echo "DELETED: $revid\n";
                     $skip = $skip + 1;
                   }
                 }
