@@ -630,7 +630,17 @@ function processHistory( $history, $elements, $wpapi, $outcome, $props ) {
 
 									$params = array( "torev" => $revid, "fromrev" => $parentid, "prop" => "diff" );
 									$userContribRequest = new Mwapi\SimpleRequest( 'compare', $params  );
-									$outcome = $wpapi->postRequest( $userContribRequest );
+
+                  $outcome = null;
+
+                  try {
+                    $outcome = $wpapi->postRequest( $userContribRequest );
+                  }
+                  catch (Exception $e) {
+                    echo $e->getMessage();
+                    echo "IT COULD NOT COMPARE\n";
+                    continue;
+                  }
 
 									if ( ! array_key_exists( $user, $elements[$title] ) ) {
 										$elements[$title][$user] = array();
