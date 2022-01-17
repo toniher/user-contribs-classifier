@@ -142,7 +142,7 @@ function assignScoreFromElements( $elements_count, $scoresys ) {
 		foreach( $struct as $schema => $val ) {
 
 			// Avoid notice
-			if ( ! array_key_exits( $schema, $count ) ) {
+			if ( ! array_key_exists( $schema, $count ) ) {
 				$count[$schema] = 0;
 			}
 
