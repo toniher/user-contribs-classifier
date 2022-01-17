@@ -74,9 +74,13 @@ function storeHashInDb( $database, $pages ) {
 
 			} else {
 
-				if ( count( $rows ) > 0 ) {
+				if ( is_array( $rows ) && count( $rows ) > 0 ) {
 
-					$preCount = $rows[0]["num"];
+          // Default 0
+          $preCount = 0;
+          if ( is_array( $rows[0] ) && array_key_exists( "num", $rows[0] ) ) {
+            $preCount = $rows[0]["num"];
+          }
 
 					if ( $preCount < $count ) {
 
