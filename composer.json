@@ -5,5 +5,8 @@
 		"data-values/geo": "1.1.*",
 		"data-values/time": "0.8.*",
 		"league/csv": "9.*"
-    	}
+    	},
+	"require-dev": {
+		"friendsofphp/php-cs-fixer": "^3.13"
+	}
 }
