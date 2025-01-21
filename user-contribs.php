@@ -2,859 +2,872 @@
 
 // ini_set('memory_limit', '32384M');
 
-require_once( __DIR__ . '/vendor/autoload.php' );
+require_once(__DIR__ . '/vendor/autoload.php');
 
-use \Mediawiki\Api as MwApi;
-use \Mediawiki\Api\ApiUser;
-use \Wikibase\Api as WbApi;
-use \Mediawiki\DataModel as MwDM;
-use \Wikibase\DataModel as WbDM;
+use Mediawiki\Api as MwApi;
+use Mediawiki\Api\ApiUser;
+use Wikibase\Api as WbApi;
+use Mediawiki\DataModel as MwDM;
+use Wikibase\DataModel as WbDM;
 
 // Detect commandline args
 $conffile = 'config.json';
 $userhandle = null;
 $taskname = null; // If no task given, exit
 
-if ( count( $argv ) > 1 ) {
-	$conffile = $argv[1];
+if (count($argv) > 1) {
+    $conffile = $argv[1];
 }
 
-if ( count( $argv ) > 2 ) {
-	$userhandle = $argv[2];
+if (count($argv) > 2) {
+    $userhandle = $argv[2];
 }
 
-if ( count( $argv ) > 3 ) {
-	$taskname = $argv[3];
+if (count($argv) > 3) {
+    $taskname = $argv[3];
 }
 
 // Detect if files
-if ( ! file_exists( $conffile ) || ! $userhandle ) {
-	die( "Config file or username needed" );
+if (! file_exists($conffile) || ! $userhandle) {
+    die("Config file or username needed");
 }
 
-$confjson = json_decode( file_get_contents( $conffile ), 1 );
+$confjson = json_decode(file_get_contents($conffile), 1);
 
 $wikiconfig = null;
 $wikidataconfig = null;
 
-if ( array_key_exists( "wikipedia", $confjson ) ) {
-	$wikiconfig = $confjson["wikipedia"];
+if (array_key_exists("wikipedia", $confjson)) {
+    $wikiconfig = $confjson["wikipedia"];
 }
 
-if ( array_key_exists( "wikidata", $confjson ) ) {
-	$wikidataconfig = $confjson["wikidata"];
+if (array_key_exists("wikidata", $confjson)) {
+    $wikidataconfig = $confjson["wikidata"];
 }
 
-if ( array_key_exists( "tasks", $confjson ) ) {
-	$tasksConf = $confjson["tasks"];
+if (array_key_exists("tasks", $confjson)) {
+    $tasksConf = $confjson["tasks"];
 }
 
 
-$tasks = array_keys( $tasksConf );
+$tasks = array_keys($tasksConf);
 $props = null;
 
-if ( count( $tasks ) < 1 ) {
-	// No task, exit
-	exit;
+if (count($tasks) < 1) {
+    // No task, exit
+    exit;
 }
 
-if ( ! $taskname ) {
-	echo "No task specified!";
-	exit;
+if (! $taskname) {
+    echo "No task specified!";
+    exit;
 } else {
-	if ( in_array( $taskname, $tasks ) ) {
-		$props = $tasksConf[ $taskname ];
-	} else {
-		// Some error here. Stop it
-		exit;
-	}
+    if (in_array($taskname, $tasks)) {
+        $props = $tasksConf[ $taskname ];
+    } else {
+        // Some error here. Stop it
+        exit;
+    }
 }
 
-$wpapi = Mwapi\MediawikiApi::newFromApiEndpoint( $wikiconfig["url"] );
+$wpapi = Mwapi\MediawikiApi::newFromApiEndpoint($wikiconfig["url"]);
 
 $uclimit = 500;
 
 // Login
-if ( array_key_exists( "user", $wikiconfig ) && array_key_exists( "password", $wikiconfig ) ) {
+if (array_key_exists("user", $wikiconfig) && array_key_exists("password", $wikiconfig)) {
 
-	$wpapi->login( new ApiUser( $wikiconfig["user"], $wikiconfig["password"] ) );
-	// This below assumes you're a bot
-	$uclimit = 500;
+    $wpapi->login(new ApiUser($wikiconfig["user"], $wikiconfig["password"]));
+    // This below assumes you're a bot
+    $uclimit = 500;
 
 }
 
 # Base print
-if ( array_key_exists( "retrieve", $props ) ) {
+if (array_key_exists("retrieve", $props)) {
 
-	if ( $props["wikiformat"] ) {
-		echo "{| class='wikitable sortable' \n";
-		echo "! Usuari !! Articles !! Octets !! ".implode( "\t", $props["retrieve"] )."\n";
-	} else {
-		echo "Usuari\tArticles\tOctets\t".implode( "\t", $props["retrieve"] )."\n";
-	}
+    if ($props["wikiformat"]) {
+        echo "{| class='wikitable sortable' \n";
+        echo "! Usuari !! Articles !! Octets !! ".implode("\t", $props["retrieve"])."\n";
+    } else {
+        echo "Usuari\tArticles\tOctets\t".implode("\t", $props["retrieve"])."\n";
+    }
 } else {
-	if ( $props["wikiformat"] ) {
-		echo "{|  class='wikitable sortable'\n";
-		echo "! Usuari !! Articles !! Octets\n";
-	} else {
-		echo "Usuari\tArticles\tOctets\n";
-	}
+    if ($props["wikiformat"]) {
+        echo "{|  class='wikitable sortable'\n";
+        echo "! Usuari !! Articles !! Octets\n";
+    } else {
+        echo "Usuari\tArticles\tOctets\n";
+    }
 }
 
 $userlist = array( );
 
-if ( file_exists( $userhandle ) ) {
+if (file_exists($userhandle)) {
 
-	$userstr = file_get_contents( $userhandle );
-	$userlist = explode( "\n", $userstr );
+    $userstr = file_get_contents($userhandle);
+    $userlist = explode("\n", $userstr);
 
 } else {
 
-	$userlist = explode( ",", $userhandle );
+    $userlist = explode(",", $userhandle);
 }
 
-foreach( $userlist as $username ) {
+foreach ($userlist as $username) {
 
-	$username = trim( $username );
+    $username = trim($username);
 
-	$pages = array( );
+    $pages = array( );
 
-	if ( empty( $username ) ) {
-		continue;
-	}
+    if (empty($username)) {
+        continue;
+    }
 
-	$params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => $uclimit, 'ucprop' =>'ids|title|timestamp|comment|sizediff|flags' );
+    $params = array( 'list' => 'usercontribs', 'ucuser' => $username, 'uclimit' => $uclimit, 'ucprop' => 'ids|title|timestamp|comment|sizediff|flags' );
 
-	if ( array_key_exists( "namespace", $props ) ) {
-		if ( is_array( $props["namespace"] ) ) {
-			$params["ucnamespace"] = implode('|', $props["namespace"]);
-		} else {
-			$params["ucnamespace"] = $props["namespace"];
-		}
-	}
+    if (array_key_exists("namespace", $props)) {
+        if (is_array($props["namespace"])) {
+            $params["ucnamespace"] = implode('|', $props["namespace"]);
+        } else {
+            $params["ucnamespace"] = $props["namespace"];
+        }
+    }
 
-	if ( array_key_exists( "newonly", $props ) ) {
+    if (array_key_exists("newonly", $props)) {
 
-		if ( $props["newonly"] ) {
-			$params["ucshow"] = "new";
-		}
+        if ($props["newonly"]) {
+            $params["ucshow"] = "new";
+        }
 
-	}
+    }
 
-	if ( array_key_exists( "startdate", $props ) ) {
-		$params["ucstart"] = $props["startdate"];
-		$params["ucdir"] = "newer";
-	}
+    if (array_key_exists("startdate", $props)) {
+        $params["ucstart"] = $props["startdate"];
+        $params["ucdir"] = "newer";
+    }
 
-	if ( array_key_exists( "enddate", $props ) ) {
-		$params["ucend"]= $props["enddate"];
-		$params["ucdir"] = "newer";
-	}
-
-
-	// Get pages of user
-	$pages = retrieveWpQuery( $pages, $wpapi, $params, null, $props );
-
-	if ( array_key_exists( "redirectmerge", $props ) ) {
-
-		if ( $props["redirectmerge"] ) {
-			$pages = redirectMerge( $pages, $wpapi );
-		}
-
-	}
-
-	$retrieve = null;
-	$result = null;
-
-	# Only if we handle Wikidata Props
-	if ( array_key_exists( "retrieve", $props ) ) {
-		// Get Qs of pages
-		$retrieve = retrieveQsFromWp( $pages, $wpapi );
-
-		$wdapi = MwApi\MediawikiApi::newFromApiEndpoint( $wikidataconfig['url'] );
-
-		// Login
-		if ( array_key_exists( "user", $wikidataconfig ) && array_key_exists( "password", $wikidataconfig ) ) {
-
-			$wdapi->login( new ApiUser( $wikidataconfig["user"], $wikidataconfig["password"] ) );
-
-		}
-
-		$result = retrievePropsFromWd( $retrieve, $props, $wdapi );
-
-	}
-
-	# TODO: This changed and now token is needed
-	#$wpapi->logout();
-	#$wdapi->logout();
-
-	// TODO: In case of retrieving contribs from Wikidata, handling label or sitelink for clarity
-
-	printAll( $pages, $retrieve, $result, $props, $username );
-
-}
-
-if ( $props["wikiformat"] ) {
-	echo "|}";
-}
-
-function redirectMerge( $pages, $wpapi ) {
-
-	$listPages = array_keys( $pages );
-
-	$num = 10;
-
-	$contPages = array();
-
-	$i = 0;
-	$c = 0;
-
-	foreach ( $listPages as $page ) {
-
-		if ( $i == 0 ) {
-			$contPages[] = array();
-		}
-
-		array_push( $contPages[$c], $page );
-
-		$i++;
-		if ( $i == $num ) {
-			$i = 0;
-			$c++;
-		}
-
-	}
-
-	$mapping = array();
-
-	foreach ( $contPages as $cont ) {
-
-		$titles = implode( "|", $cont );
-
-		$params = array( 'titles' => $titles, 'redirects' => true );
-
-		$redRequest = new Mwapi\SimpleRequest( 'query', $params  );
-
-		$outcome = $wpapi->postRequest( $redRequest );
-
-		if ( array_key_exists( "query", $outcome ) ) {
-
-			if ( array_key_exists( "redirects", $outcome["query"] ) ) {
-
-				foreach( $outcome["query"]["redirects"] as $redirect ) {
-
-					if ( array_key_exists( "from", $redirect ) ) {
-						$mapping[$redirect["from"]]= $redirect["to"];
-					}
-
-				}
-
-			}
-
-		}
-
-	}
-
-	foreach( $pages as $page => $struct ) {
-
-		if ( array_key_exists( $page, $mapping ) ) {
-			$redirect = $mapping[$page];
-
-			if ( ! array_key_exists( $redirect, $pages ) ) {
-				$pages[$redirect] = array();
-				$pages[$redirect]["size"] = 0;
-			}
-
-			$pages[$redirect]["size"]+= $pages[$page]["size"];
-			unset( $pages[$page] );
+    if (array_key_exists("enddate", $props)) {
+        $params["ucend"] = $props["enddate"];
+        $params["ucdir"] = "newer";
+    }
 
 
-		}
+    // Get pages of user
+    $pages = retrieveWpQuery($pages, $wpapi, $params, null, $props);
 
-	}
+    if (array_key_exists("redirectmerge", $props)) {
 
-	return $pages;
+        if ($props["redirectmerge"]) {
+            $pages = redirectMerge($pages, $wpapi);
+        }
+
+    }
+
+    $retrieve = null;
+    $result = null;
+
+    # Only if we handle Wikidata Props
+    if (array_key_exists("retrieve", $props)) {
+        // Get Qs of pages
+        $retrieve = retrieveQsFromWp($pages, $wpapi);
+
+        $wdapi = MwApi\MediawikiApi::newFromApiEndpoint($wikidataconfig['url']);
+
+        // Login
+        if (array_key_exists("user", $wikidataconfig) && array_key_exists("password", $wikidataconfig)) {
+
+            $wdapi->login(new ApiUser($wikidataconfig["user"], $wikidataconfig["password"]));
+
+        }
+
+        $result = retrievePropsFromWd($retrieve, $props, $wdapi);
+
+    }
+
+    # TODO: This changed and now token is needed
+    #$wpapi->logout();
+    #$wdapi->logout();
+
+    // TODO: In case of retrieving contribs from Wikidata, handling label or sitelink for clarity
+
+    printAll($pages, $retrieve, $result, $props, $username);
 
 }
 
+if ($props["wikiformat"]) {
+    echo "|}";
+}
 
-function retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props ) {
+function redirectMerge($pages, $wpapi)
+{
 
-	if ( $uccontinue ) {
-		$params["uccontinue"] = $uccontinue;
-	}
+    $listPages = array_keys($pages);
 
-	$userContribRequest = new Mwapi\SimpleRequest( 'query', $params  );
+    $num = 10;
 
-	$outcome = $wpapi->postRequest( $userContribRequest );
+    $contPages = array();
 
-	$uccontinue = null;
+    $i = 0;
+    $c = 0;
 
-	if ( array_key_exists( "continue", $outcome ) ) {
+    foreach ($listPages as $page) {
 
-		if ( array_key_exists( "uccontinue", $outcome["continue"] ) ) {
+        if ($i == 0) {
+            $contPages[] = array();
+        }
 
-			$uccontinue = $outcome["continue"]["uccontinue"];
-		}
-	}
+        array_push($contPages[$c], $page);
 
-	if ( array_key_exists( "query", $outcome ) ) {
+        $i++;
+        if ($i == $num) {
+            $i = 0;
+            $c++;
+        }
 
-		if ( array_key_exists( "usercontribs", $outcome["query"] ) ) {
+    }
 
-			$pages = processPages( $pages, $outcome["query"]["usercontribs"], $props );
+    $mapping = array();
 
-		}
+    foreach ($contPages as $cont) {
 
-	}
+        $titles = implode("|", $cont);
 
-	if ( $uccontinue ) {
-		$pages = retrieveWpQuery( $pages, $wpapi, $params, $uccontinue, $props );
-	}
+        $params = array( 'titles' => $titles, 'redirects' => true );
 
-	return $pages;
+        $redRequest = new Mwapi\SimpleRequest('query', $params);
+
+        $outcome = $wpapi->postRequest($redRequest);
+
+        if (array_key_exists("query", $outcome)) {
+
+            if (array_key_exists("redirects", $outcome["query"])) {
+
+                foreach ($outcome["query"]["redirects"] as $redirect) {
+
+                    if (array_key_exists("from", $redirect)) {
+                        $mapping[$redirect["from"]] = $redirect["to"];
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+
+    foreach ($pages as $page => $struct) {
+
+        if (array_key_exists($page, $mapping)) {
+            $redirect = $mapping[$page];
+
+            if (! array_key_exists($redirect, $pages)) {
+                $pages[$redirect] = array();
+                $pages[$redirect]["size"] = 0;
+            }
+
+            $pages[$redirect]["size"] += $pages[$page]["size"];
+            unset($pages[$page]);
+
+
+        }
+
+    }
+
+    return $pages;
 
 }
 
-function processPages( $pages, $contribs, $props ) {
 
-	foreach ( $contribs as $contrib ) {
+function retrieveWpQuery($pages, $wpapi, $params, $uccontinue, $props)
+{
 
-		$title = strval( $contrib["title"] );
-		#$timestamp = $contrib["timestamp"];
-		$size = intval( $contrib["sizediff"] );
+    if ($uccontinue) {
+        $params["uccontinue"] = $uccontinue;
+    }
 
-		$struct = array( "size" => $size );
+    $userContribRequest = new Mwapi\SimpleRequest('query', $params);
 
-		# Regex skip comment
-		if ( array_key_exists( "skip_startswith", $props ) && array_key_exists( "comment", $contrib ) ) {
+    $outcome = $wpapi->postRequest($userContribRequest);
 
-			if ( startsWith( $contrib["comment"], $props["skip_startswith"] ) ) {
-				continue;
+    $uccontinue = null;
 
-			}
+    if (array_key_exists("continue", $outcome)) {
 
-		}
+        if (array_key_exists("uccontinue", $outcome["continue"])) {
 
-		#$timeCompare = compareTime( $timestamp, $props );
+            $uccontinue = $outcome["continue"]["uccontinue"];
+        }
+    }
 
-		#if ( $timeCompare ) {
+    if (array_key_exists("query", $outcome)) {
 
-			if ( array_key_exists( $title, $pages ) ) {
+        if (array_key_exists("usercontribs", $outcome["query"])) {
 
-				#$prets = $pages[$title]["timestamp"];
-				$presize = $pages[$title]["size"];
+            $pages = processPages($pages, $outcome["query"]["usercontribs"], $props);
 
-				#if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+        }
 
-				#	$pages[$title]["timestamp"] = $prets;
-				#}
+    }
 
-				$pages[$title]["size"] = $presize + $size;
+    if ($uccontinue) {
+        $pages = retrieveWpQuery($pages, $wpapi, $params, $uccontinue, $props);
+    }
+
+    return $pages;
+
+}
+
+function processPages($pages, $contribs, $props)
+{
+
+    foreach ($contribs as $contrib) {
+
+        $title = strval($contrib["title"]);
+        #$timestamp = $contrib["timestamp"];
+        $size = intval($contrib["sizediff"]);
+
+        $struct = array( "size" => $size );
+
+        # Regex skip comment
+        if (array_key_exists("skip_startswith", $props) && array_key_exists("comment", $contrib)) {
+
+            if (startsWith($contrib["comment"], $props["skip_startswith"])) {
+                continue;
+
+            }
+
+        }
+
+        #$timeCompare = compareTime( $timestamp, $props );
+
+        #if ( $timeCompare ) {
+
+        if (array_key_exists($title, $pages)) {
+
+            #$prets = $pages[$title]["timestamp"];
+            $presize = $pages[$title]["size"];
+
+            #if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+
+            #	$pages[$title]["timestamp"] = $prets;
+            #}
+
+            $pages[$title]["size"] = $presize + $size;
 
 
 
-			} else {
+        } else {
 
-				$pages[ $title ] = $struct;
-			}
+            $pages[ $title ] = $struct;
+        }
 
-		#}
+        #}
 
-	}
-	return $pages;
+    }
+    return $pages;
 }
 
 
 
 function startsWith($haystack, $needle)
 {
-     $length = strlen($needle);
-     return (substr($haystack, 0, $length) === $needle);
+    $length = strlen($needle);
+    return (substr($haystack, 0, $length) === $needle);
 }
 
-function compareTime( $timestamp, $props ) {
+function compareTime($timestamp, $props)
+{
 
-	$inInterval = true;
+    $inInterval = true;
 
-	$timestampTime = strtotime( $timestamp );
+    $timestampTime = strtotime($timestamp);
 
-	$startdateTime = null;
-	$enddateTime = null;
+    $startdateTime = null;
+    $enddateTime = null;
 
-	if ( array_key_exists( "startdate", $props ) ) {
-		$startdateTime = strtotime( $props["startdate"] );
-	}
+    if (array_key_exists("startdate", $props)) {
+        $startdateTime = strtotime($props["startdate"]);
+    }
 
-	if ( array_key_exists( "enddate", $props ) ) {
-		$enddateTime = strtotime( $props["enddate"] );
-	}
+    if (array_key_exists("enddate", $props)) {
+        $enddateTime = strtotime($props["enddate"]);
+    }
 
-	if ( $startdateTime && ( $timestampTime < $startdateTime ) ) {
-		$inInterval = false;
-	}
+    if ($startdateTime && ($timestampTime < $startdateTime)) {
+        $inInterval = false;
+    }
 
-	if ( $enddateTime && ( $timestampTime > $enddateTime ) ) {
-		$inInterval = false;
-	}
+    if ($enddateTime && ($timestampTime > $enddateTime)) {
+        $inInterval = false;
+    }
 
-	return $inInterval;
-
-}
-
-function retrieveQsFromWp( $pages, $wpapi ){
-
-	$batch = 50;
-	$count = 0;
-	$titles = array();
-	$retrieve = array();
-	$retrieve["pagesQ"] = array();
-	$retrieve["redirects"] = array();
-
-	foreach( $pages as $page => $struct ) {
-
-		$count++;
-
-		if ( $count < $batch ) {
-			array_push( $titles, $page );
-		} else {
-
-			$retrieve = retrieveWikidataId( $retrieve, $titles, $wpapi );
-
-			$count = 0;
-			$titles = array( );
-			array_push( $titles, $page );
-
-		}
-
-	}
-
-	if ( count( $titles ) > 0 ) {
-
-		$retrieve = retrieveWikidataId( $retrieve, $titles, $wpapi );
-
-	}
-
-	return $retrieve;
-}
-
-function retrieveWikidataId( $retrieve, $titles, $wpapi ){
-
-	$titlesStr = implode( "|", $titles );
-	#$titlesStr = str_replace( " ", "_", $titlesStr );
-
-	// Below for main WikiData ID
-	$params = array( "titles" => $titlesStr, "prop" => "pageprops", "ppprop" => "wikibase_item", "redirects" => "true" );
-
-	$listQsRequest = new Mwapi\SimpleRequest( 'query', $params  );
-
-	$outcome = $wpapi->postRequest( $listQsRequest );
-
-	if ( array_key_exists( "query", $outcome ) ) {
-
-		if ( array_key_exists( "redirects", $outcome["query"] ) ) {
-
-			foreach ( $outcome["query"]["redirects"] as $redirect ) {
-
-				$retrieve["redirects"][ $redirect["from"] ] = $redirect["to"];
-
-			}
-
-		}
-
-		if ( array_key_exists( "pages", $outcome["query"] ) ) {
-
-			foreach ( $outcome["query"]["pages"] as $id => $qentry ) {
-
-				if ( array_key_exists( "pageprops", $qentry ) ) {
-
-					if ( array_key_exists( "wikibase_item", $qentry["pageprops"] ) ) {
-
-						if ( count( $qentry["pageprops"]["wikibase_item"] ) > 0 ) {
-
-							$retrieve["pagesQ"][$qentry["title"]] = $qentry["pageprops"]["wikibase_item"];
-
-						}
-					}
-				}
-			}
-
-		}
-	}
-
-	return $retrieve;
+    return $inInterval;
 
 }
 
-function retrievePropsFromWd( $retrieve, $props, $wdapi ) {
+function retrieveQsFromWp($pages, $wpapi)
+{
 
-	$batch = 50;
-	$count = 0;
-	$qentries = array();
-	$queryResult = array();
+    $batch = 50;
+    $count = 0;
+    $titles = array();
+    $retrieve = array();
+    $retrieve["pagesQ"] = array();
+    $retrieve["redirects"] = array();
 
-	foreach( $retrieve["pagesQ"] as $page => $qentry ) {
+    foreach ($pages as $page => $struct) {
 
-		$count++;
+        $count++;
 
-		if ( $count < $batch ) {
-			array_push( $qentries, $qentry );
-		} else {
+        if ($count < $batch) {
+            array_push($titles, $page);
+        } else {
 
-			$queryResult = retrievePropsWd( $queryResult, $qentries, $props, $wdapi );
+            $retrieve = retrieveWikidataId($retrieve, $titles, $wpapi);
 
-			$count = 0;
-			$qentries = array( );
-			array_push( $qentries, $qentry );
+            $count = 0;
+            $titles = array( );
+            array_push($titles, $page);
 
-		}
+        }
 
-	}
+    }
 
-	if ( count( $qentries ) > 0 ) {
+    if (count($titles) > 0) {
 
-		$queryResult = retrievePropsWd( $queryResult, $qentries, $props, $wdapi );
+        $retrieve = retrieveWikidataId($retrieve, $titles, $wpapi);
 
-	}
+    }
 
-	return $queryResult;
+    return $retrieve;
+}
+
+function retrieveWikidataId($retrieve, $titles, $wpapi)
+{
+
+    $titlesStr = implode("|", $titles);
+    #$titlesStr = str_replace( " ", "_", $titlesStr );
+
+    // Below for main WikiData ID
+    $params = array( "titles" => $titlesStr, "prop" => "pageprops", "ppprop" => "wikibase_item", "redirects" => "true" );
+
+    $listQsRequest = new Mwapi\SimpleRequest('query', $params);
+
+    $outcome = $wpapi->postRequest($listQsRequest);
+
+    if (array_key_exists("query", $outcome)) {
+
+        if (array_key_exists("redirects", $outcome["query"])) {
+
+            foreach ($outcome["query"]["redirects"] as $redirect) {
+
+                $retrieve["redirects"][ $redirect["from"] ] = $redirect["to"];
+
+            }
+
+        }
+
+        if (array_key_exists("pages", $outcome["query"])) {
+
+            foreach ($outcome["query"]["pages"] as $id => $qentry) {
+
+                if (array_key_exists("pageprops", $qentry)) {
+
+                    if (array_key_exists("wikibase_item", $qentry["pageprops"])) {
+
+                        if (count($qentry["pageprops"]["wikibase_item"]) > 0) {
+
+                            $retrieve["pagesQ"][$qentry["title"]] = $qentry["pageprops"]["wikibase_item"];
+
+                        }
+                    }
+                }
+            }
+
+        }
+    }
+
+    return $retrieve;
 
 }
 
-function retrievePropsWd( $queryResult, $qentries, $props, $wdapi ) {
+function retrievePropsFromWd($retrieve, $props, $wdapi)
+{
 
-	$qentriesStr = implode( "|", $qentries );
+    $batch = 50;
+    $count = 0;
+    $qentries = array();
+    $queryResult = array();
 
-	// Below for main WikiData ID
-	$params = array( "ids" => $qentriesStr, "props" => "claims" );
+    foreach ($retrieve["pagesQ"] as $page => $qentry) {
 
-	$listEntities = new Mwapi\SimpleRequest( 'wbgetentities', $params  );
+        $count++;
 
-	$outcome = $wdapi->postRequest( $listEntities );
+        if ($count < $batch) {
+            array_push($qentries, $qentry);
+        } else {
 
-	$filter = null;
-	$filterProps = array( );
-	$retrieve = null;
+            $queryResult = retrievePropsWd($queryResult, $qentries, $props, $wdapi);
 
-	if ( array_key_exists( "filter", $props ) ) {
-		$filter = $props["filter"];
+            $count = 0;
+            $qentries = array( );
+            array_push($qentries, $qentry);
 
-		foreach( $filter as $filterEntry ) {
+        }
 
-			if ( array_key_exists( "prop", $filterEntry ) ) {
-				$filterProps[ $filterEntry["prop"] ] = null;
+    }
 
-				if ( array_key_exists( "propValue", $filterEntry ) ) {
-					$filterProps[ $filterEntry["prop"] ] = $filterEntry["propValue"];
-				}
-			}
-		}
-	}
+    if (count($qentries) > 0) {
 
-	if ( array_key_exists( "retrieve", $props ) ) {
-		$retrieve = $props["retrieve"];
-	}
+        $queryResult = retrievePropsWd($queryResult, $qentries, $props, $wdapi);
 
-	if ( array_key_exists( "entities", $outcome	) ) {
+    }
 
-
-		foreach ( $outcome["entities"] as $entity => $struct ) {
-
-			$in = 0;
-			$retrieved = array( );
-
-			if ( array_key_exists( "claims", $struct ) ) {
-
-				foreach ( $struct["claims"] as $claimProp => $claimStruct ) {
-
-
-					if ( in_array( $claimProp, $retrieve ) ) {
-						$retrieved[ $claimProp ] = getValueSnaks( $claimStruct );
-
-					}
-
-					if ( array_key_exists( $claimProp, $filterProps ) ) {
-
-						if ( ! $filterProps[ $claimProp ] ) {
-							$in = 1;
-						} else {
-							if ( compareValueSnaks( $filterProps[ $claimProp ], $claimStruct ) ) {
-
-								$in = 1;
-							}
-						}
-
-					}
-
-				}
-
-			}
-
-
-			if ( $in > 0 ) {
-
-
-				if ( count( array_keys( $retrieved ) ) >  0 ) {
-
-					$queryResult[ $entity ] = $retrieved;
-
-				}
-
-			}
-
-		}
-
-	}
-
-	return $queryResult;
+    return $queryResult;
 
 }
 
-function getValueSnaks( $claimStruct ) {
+function retrievePropsWd($queryResult, $qentries, $props, $wdapi)
+{
 
-	$values = array();
+    $qentriesStr = implode("|", $qentries);
 
-	foreach ( $claimStruct as $struct ) {
+    // Below for main WikiData ID
+    $params = array( "ids" => $qentriesStr, "props" => "claims" );
 
-		if ( array_key_exists( "mainsnak", $struct ) ) {
+    $listEntities = new Mwapi\SimpleRequest('wbgetentities', $params);
 
-			$mainsnak = $struct["mainsnak"];
+    $outcome = $wdapi->postRequest($listEntities);
 
-			if ( array_key_exists( "datavalue", $mainsnak ) ) {
+    $filter = null;
+    $filterProps = array( );
+    $retrieve = null;
 
-				array_push( $values, processDataValue( $mainsnak["datavalue"] ) );
+    if (array_key_exists("filter", $props)) {
+        $filter = $props["filter"];
 
-			}
+        foreach ($filter as $filterEntry) {
 
-		}
-	}
+            if (array_key_exists("prop", $filterEntry)) {
+                $filterProps[ $filterEntry["prop"] ] = null;
 
-	return $values;
+                if (array_key_exists("propValue", $filterEntry)) {
+                    $filterProps[ $filterEntry["prop"] ] = $filterEntry["propValue"];
+                }
+            }
+        }
+    }
+
+    if (array_key_exists("retrieve", $props)) {
+        $retrieve = $props["retrieve"];
+    }
+
+    if (array_key_exists("entities", $outcome)) {
+
+
+        foreach ($outcome["entities"] as $entity => $struct) {
+
+            $in = 0;
+            $retrieved = array( );
+
+            if (array_key_exists("claims", $struct)) {
+
+                foreach ($struct["claims"] as $claimProp => $claimStruct) {
+
+
+                    if (in_array($claimProp, $retrieve)) {
+                        $retrieved[ $claimProp ] = getValueSnaks($claimStruct);
+
+                    }
+
+                    if (array_key_exists($claimProp, $filterProps)) {
+
+                        if (! $filterProps[ $claimProp ]) {
+                            $in = 1;
+                        } else {
+                            if (compareValueSnaks($filterProps[ $claimProp ], $claimStruct)) {
+
+                                $in = 1;
+                            }
+                        }
+
+                    }
+
+                }
+
+            }
+
+
+            if ($in > 0) {
+
+
+                if (count(array_keys($retrieved)) >  0) {
+
+                    $queryResult[ $entity ] = $retrieved;
+
+                }
+
+            }
+
+        }
+
+    }
+
+    return $queryResult;
+
 }
 
-function compareValueSnaks(  $value, $claimStruct ) {
+function getValueSnaks($claimStruct)
+{
 
-	$values = array();
+    $values = array();
 
-	foreach ( $claimStruct as $struct ) {
+    foreach ($claimStruct as $struct) {
 
-		if ( array_key_exists( "mainsnak", $struct ) ) {
+        if (array_key_exists("mainsnak", $struct)) {
 
-			$mainsnak = $struct["mainsnak"];
+            $mainsnak = $struct["mainsnak"];
 
-			if ( array_key_exists( "datavalue", $mainsnak ) ) {
+            if (array_key_exists("datavalue", $mainsnak)) {
 
-				array_push( $values, processDataValue( $mainsnak["datavalue"] ) );
+                array_push($values, processDataValue($mainsnak["datavalue"]));
 
-			}
+            }
 
-		}
-	}
+        }
+    }
 
-	if ( in_array( $value, $values ) ) {
-		return true;
-	} else {
-		return false;
-	}
+    return $values;
+}
+
+function compareValueSnaks($value, $claimStruct)
+{
+
+    $values = array();
+
+    foreach ($claimStruct as $struct) {
+
+        if (array_key_exists("mainsnak", $struct)) {
+
+            $mainsnak = $struct["mainsnak"];
+
+            if (array_key_exists("datavalue", $mainsnak)) {
+
+                array_push($values, processDataValue($mainsnak["datavalue"]));
+
+            }
+
+        }
+    }
+
+    if (in_array($value, $values)) {
+        return true;
+    } else {
+        return false;
+    }
 
 }
 
-function processDataValue( $datavalue ) {
+function processDataValue($datavalue)
+{
 
-	$type = $datavalue["type"];
-	$value = null;
+    $type = $datavalue["type"];
+    $value = null;
 
-	switch( $type ) {
+    switch ($type) {
 
-		// TODO: More to include
-		case "wikibase-entityid" :
-			$value = $datavalue["value"]["id"];
-			break;
-		case "time":
-			$value = $datavalue["value"]["time"];
-			break;
-		default:
-			if ( array_key_exists( "value", $datavalue ) ) {
-				$value = $datavalue["value"];
-			}
-	}
+        // TODO: More to include
+        case "wikibase-entityid" :
+            $value = $datavalue["value"]["id"];
+            break;
+        case "time":
+            $value = $datavalue["value"]["time"];
+            break;
+        default:
+            if (array_key_exists("value", $datavalue)) {
+                $value = $datavalue["value"];
+            }
+    }
 
-	return $value;
+    return $value;
 
 }
 
-function resolveQValue( $qval, $type="label", $lang="ca" ) {
+function resolveQValue($qval, $type = "label", $lang = "ca")
+{
 
-	$output = null;
+    $output = null;
 
-	// TODO To be improved
-	if ( $type === "label" ) {
+    // TODO To be improved
+    if ($type === "label") {
 
-		$query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ".
-		"PREFIX wd: <http://www.wikidata.org/entity/> ".
-		"select  * ".
-		"where { ".
-	    "    wd:$qval rdfs:label ?label . ".
-		"FILTER (langMatches( lang(?label), \"$lang\" ) ) ".
-		"} ".
-		"LIMIT 1";
+        $query = "PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#> ".
+        "PREFIX wd: <http://www.wikidata.org/entity/> ".
+        "select  * ".
+        "where { ".
+        "    wd:$qval rdfs:label ?label . ".
+        "FILTER (langMatches( lang(?label), \"$lang\" ) ) ".
+        "} ".
+        "LIMIT 1";
 
-		$url = "https://query.wikidata.org/sparql?query=".urlencode( $query );
+        $url = "https://query.wikidata.org/sparql?query=".urlencode($query);
 
-		$ch = curl_init();
-		$headers = [
-			'Accept: application/json',
-			'User-Agent: Catabot/0.1'
-		];
+        $ch = curl_init();
+        $headers = [
+            'Accept: application/json',
+            'User-Agent: Catabot/0.1'
+        ];
 
-		curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
-		curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-		curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
-		curl_setopt($ch, CURLOPT_URL, $url );
-		$result = curl_exec($ch);
-		curl_close($ch);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_URL, $url);
+        $result = curl_exec($ch);
+        curl_close($ch);
 
-		$obj = json_decode($result, true);
+        $obj = json_decode($result, true);
 
-		if ( array_key_exists( "results", $obj ) ) {
+        if (array_key_exists("results", $obj)) {
 
-			if ( array_key_exists( "bindings", $obj["results"] ) ) {
+            if (array_key_exists("bindings", $obj["results"])) {
 
-				// Assuming only one;
-				foreach (  $obj["results"]["bindings"] as $binding ) {
+                // Assuming only one;
+                foreach ($obj["results"]["bindings"] as $binding) {
 
-					if ( array_key_exists( "label", $binding ) ) {
+                    if (array_key_exists("label", $binding)) {
 
-						if ( array_key_exists( "value", $binding["label"] ) ) {
+                        if (array_key_exists("value", $binding["label"])) {
 
-							if ( ! $output ) {
-								$output = "";
-							} else {
-								$output.="; ";
-							}
-							$output.= $binding["label"]["value"];
+                            if (! $output) {
+                                $output = "";
+                            } else {
+                                $output .= "; ";
+                            }
+                            $output .= $binding["label"]["value"];
 
-						}
+                        }
 
-					}
+                    }
 
-				}
-			}
-		}
+                }
+            }
+        }
 
-	}
+    }
 
-	return $output;
+    return $output;
 }
 
-function printAll( $pages, $retrieve, $result, $props, $username, $sum=true ) {
+function printAll($pages, $retrieve, $result, $props, $username, $sum = true)
+{
 
-	if ( array_key_exists( "wikiformat", $props ) ) {
-		if ( $props["wikiformat"] ) {
-			$username = "{{u|".$username."}}";
-		}
-	}
+    if (array_key_exists("wikiformat", $props)) {
+        if ($props["wikiformat"]) {
+            $username = "{{u|".$username."}}";
+        }
+    }
 
-	foreach ( $pages as $page => $struct ) {
+    foreach ($pages as $page => $struct) {
 
-		$sumVal = 0;
+        $sumVal = 0;
 
-		$pagelabel = $page;
-		if ( array_key_exists( "resolvepage", $props ) ) {
-			// To be improved;
-			$qval = resolveQValue( $page );
-			if ( $qval ) {
-				$pagelabel = $qval;
-			}
-			sleep( 1 );
-		}
+        $pagelabel = $page;
+        if (array_key_exists("resolvepage", $props)) {
+            // To be improved;
+            $qval = resolveQValue($page);
+            if ($qval) {
+                $pagelabel = $qval;
+            }
+            sleep(1);
+        }
 
-		$print = 0;
-		if ( array_key_exists( "size", $props ) ) {
+        $print = 0;
+        if (array_key_exists("size", $props)) {
 
-			if ( $struct["size"] < $props["size"] ) {
+            if ($struct["size"] < $props["size"]) {
 
-				# If smaller size, avoid
-				continue;
-			}
+                # If smaller size, avoid
+                continue;
+            }
 
-			if ( $sum ) {
-				$sumVal =+ $struct["size"];
+            if ($sum) {
+                $sumVal = + $struct["size"];
 
-			}
-		}
+            }
+        }
 
-		$size = $struct["size"];
+        $size = $struct["size"];
 
-		if ( $sum ) {
-			$size = $sumVal;
-		}
+        if ($sum) {
+            $size = $sumVal;
+        }
 
-		$wikiprefix = "";
-		if ( array_key_exists( "wikiprefix", $props ) ) {
-			$wikiprefix = ":".$props["wikiprefix"].":";
-		}
+        $wikiprefix = "";
+        if (array_key_exists("wikiprefix", $props)) {
+            $wikiprefix = ":".$props["wikiprefix"].":";
+        }
 
-		if ( $retrieve && array_key_exists( $page, $retrieve["pagesQ"] ) ) {
+        if ($retrieve && array_key_exists($page, $retrieve["pagesQ"])) {
 
-			$qid = $retrieve["pagesQ"][$page];
-
-
-			$vals = array( );
-			if ( array_key_exists( $qid, $result ) ) {
-
-				$print = 1;
-
-				$Qprops = $result[ $qid ];
-
-				foreach ( $props["retrieve"] as $prop ) {
-
-					$toadd = "";
-
-					if ( array_key_exists( $prop, $Qprops ) ) {
-						$toadd = implode( ",", $Qprops[ $prop ] );
-					}
-
-					array_push( $vals, $toadd );
-
-				}
-
-			}
-
-			if ( $print > 0 ) {
-
-				if ( array_key_exists( "wikiformat", $props ) ) {
+            $qid = $retrieve["pagesQ"][$page];
 
 
-					if ( $props["wikiformat"] ) {
-						$page = "[[".$wikiprefix.$page."|".$pagelabel."]]";
-					}
-				}
+            $vals = array( );
+            if (array_key_exists($qid, $result)) {
 
-				if ( $props["wikiformat"] ) {
-					echo "|-\n";
-					echo "| ".$username." || ".$page." || ".$size." || ".implode( "\t", $vals ), "\n";
-				} else {
-					echo $username."\t".$page."\t".$size."\t".implode( "\t", $vals ), "\n";
-				}
-			}
-		} else {
+                $print = 1;
 
-			if ( array_key_exists( "wikiformat", $props ) ) {
-				if ( $props["wikiformat"] ) {
-					$page = "[[".$wikiprefix.$page."|".$pagelabel."]]";
-				}
-			}
+                $Qprops = $result[ $qid ];
 
-			if ( $props["wikiformat"] ) {
-				echo "|-\n";
-				echo "| ".$username." || ".$page." || ".$size."\n";
-			} else {
-				echo $username."\t".$page."\t".$size."\n";
-			}
-		}
+                foreach ($props["retrieve"] as $prop) {
+
+                    $toadd = "";
+
+                    if (array_key_exists($prop, $Qprops)) {
+                        $toadd = implode(",", $Qprops[ $prop ]);
+                    }
+
+                    array_push($vals, $toadd);
+
+                }
+
+            }
+
+            if ($print > 0) {
+
+                if (array_key_exists("wikiformat", $props)) {
 
 
-	}
+                    if ($props["wikiformat"]) {
+                        $page = "[[".$wikiprefix.$page."|".$pagelabel."]]";
+                    }
+                }
+
+                if ($props["wikiformat"]) {
+                    echo "|-\n";
+                    echo "| ".$username." || ".$page." || ".$size." || ".implode("\t", $vals), "\n";
+                } else {
+                    echo $username."\t".$page."\t".$size."\t".implode("\t", $vals), "\n";
+                }
+            }
+        } else {
+
+            if (array_key_exists("wikiformat", $props)) {
+                if ($props["wikiformat"]) {
+                    $page = "[[".$wikiprefix.$page."|".$pagelabel."]]";
+                }
+            }
+
+            if ($props["wikiformat"]) {
+                echo "|-\n";
+                echo "| ".$username." || ".$page." || ".$size."\n";
+            } else {
+                echo $username."\t".$page."\t".$size."\n";
+            }
+        }
+
+
+    }
 
 }
