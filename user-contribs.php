@@ -2,13 +2,11 @@
 
 // ini_set('memory_limit', '32384M');
 
-require_once(__DIR__ . '/vendor/autoload.php');
+require_once __DIR__ . '/vendor/autoload.php';
 
-use Mediawiki\Api as MwApi;
-use Mediawiki\Api\ApiUser;
-use Wikibase\Api as WbApi;
-use Mediawiki\DataModel as MwDM;
-use Wikibase\DataModel as WbDM;
+use Addwiki\Mediawiki\Api\Client\Action\Request\ActionRequest;
+use Addwiki\Mediawiki\Api\Client\Auth\UserAndPassword;
+use Addwiki\Mediawiki\Api\Client\MediaWiki;
 
 // Detect commandline args
 $conffile = 'config.json';
@@ -70,20 +68,20 @@ if (! $taskname) {
     }
 }
 
-$wpapi = Mwapi\MediawikiApi::newFromApiEndpoint($wikiconfig["url"]);
+$wpapi = null;
 
 $uclimit = 500;
 
 // Login
 if (array_key_exists("user", $wikiconfig) && array_key_exists("password", $wikiconfig)) {
-
-    $wpapi->login(new ApiUser($wikiconfig["user"], $wikiconfig["password"]));
+    $userAndPassword = new UserAndPassword($wikiconfig["user"], $wikiconfig["password"]);
+    $wpapi = MediaWiki::newFromEndpoint($wikiconfig["url"], $userAndPassword);
     // This below assumes you're a bot
     $uclimit = 500;
 
 }
 
-# Base print
+// Base print
 if (array_key_exists("retrieve", $props)) {
 
     if ($props["wikiformat"]) {
@@ -166,27 +164,26 @@ foreach ($userlist as $username) {
     $retrieve = null;
     $result = null;
 
-    # Only if we handle Wikidata Props
+    // Only if we handle Wikidata Props
     if (array_key_exists("retrieve", $props)) {
         // Get Qs of pages
         $retrieve = retrieveQsFromWp($pages, $wpapi);
 
-        $wdapi = MwApi\MediawikiApi::newFromApiEndpoint($wikidataconfig['url']);
+        $wdapi = null;
 
         // Login
         if (array_key_exists("user", $wikidataconfig) && array_key_exists("password", $wikidataconfig)) {
-
-            $wdapi->login(new ApiUser($wikidataconfig["user"], $wikidataconfig["password"]));
-
+            $userAndPassword = new UserAndPassword($wikiconfig["user"], $wikiconfig["password"]);
+            $wdapi = MediaWiki::newFromEndpoint($wikiconfig["url"], $userAndPassword);
         }
 
         $result = retrievePropsFromWd($retrieve, $props, $wdapi);
 
     }
 
-    # TODO: This changed and now token is needed
-    #$wpapi->logout();
-    #$wdapi->logout();
+    // TODO: This changed and now token is needed
+    // $wpapi->logout();
+    // $wdapi->logout();
 
     // TODO: In case of retrieving contribs from Wikidata, handling label or sitelink for clarity
 
@@ -324,12 +321,12 @@ function processPages($pages, $contribs, $props)
     foreach ($contribs as $contrib) {
 
         $title = strval($contrib["title"]);
-        #$timestamp = $contrib["timestamp"];
+        // $timestamp = $contrib["timestamp"];
         $size = intval($contrib["sizediff"]);
 
         $struct = array( "size" => $size );
 
-        # Regex skip comment
+        // Regex skip comment
         if (array_key_exists("skip_startswith", $props) && array_key_exists("comment", $contrib)) {
 
             if (startsWith($contrib["comment"], $props["skip_startswith"])) {
@@ -339,19 +336,18 @@ function processPages($pages, $contribs, $props)
 
         }
 
-        #$timeCompare = compareTime( $timestamp, $props );
+        // $timeCompare = compareTime( $timestamp, $props );
 
-        #if ( $timeCompare ) {
+        // if ( $timeCompare ) {
 
         if (array_key_exists($title, $pages)) {
 
-            #$prets = $pages[$title]["timestamp"];
+            // $prets = $pages[$title]["timestamp"];
             $presize = $pages[$title]["size"];
 
-            #if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
-
-            #	$pages[$title]["timestamp"] = $prets;
-            #}
+            // if ( strtotime( $timestamp ) < strtotime( $prets ) ) {
+            // 	$pages[$title]["timestamp"] = $prets;
+            // }
 
             $pages[$title]["size"] = $presize + $size;
 
@@ -362,7 +358,7 @@ function processPages($pages, $contribs, $props)
             $pages[ $title ] = $struct;
         }
 
-        #}
+        //}
 
     }
     return $pages;
@@ -447,15 +443,13 @@ function retrieveWikidataId($retrieve, $titles, $wpapi)
 {
 
     $titlesStr = implode("|", $titles);
-    #$titlesStr = str_replace( " ", "_", $titlesStr );
+    // $titlesStr = str_replace( " ", "_", $titlesStr );
 
     // Below for main WikiData ID
-    $params = array( "titles" => $titlesStr, "prop" => "pageprops", "ppprop" => "wikibase_item", "redirects" => "true" );
+    // $params = array( "titles" => $titlesStr, "prop" => "pageprops", "ppprop" => "wikibase_item", "redirects" => "true" );
+    // $listQsRequest = new Mwapi\SimpleRequest('query', $params);
 
-    $listQsRequest = new Mwapi\SimpleRequest('query', $params);
-
-    $outcome = $wpapi->postRequest($listQsRequest);
-
+    $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
     if (array_key_exists("query", $outcome)) {
 
         if (array_key_exists("redirects", $outcome["query"])) {
@@ -787,7 +781,7 @@ function printAll($pages, $retrieve, $result, $props, $username, $sum = true)
 
             if ($struct["size"] < $props["size"]) {
 
-                # If smaller size, avoid
+                // If smaller size, avoid
                 continue;
             }
 
