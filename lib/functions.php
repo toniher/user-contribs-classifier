@@ -658,7 +658,7 @@ function processHistory($history, $elements, $wpapi, $outcome, $props)
                                     try {
                                         // $outcome = $wpapi->postRequest($userContribRequest);
 
-                                        $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
+                                        $outcome = $wpapi->action()->request(ActionRequest::simplePost('compare', $params));
                                     } catch (Exception $e) {
                                         echo $e->getMessage();
                                         echo "IT COULD NOT COMPARE\n";
@@ -677,6 +677,7 @@ function processHistory($history, $elements, $wpapi, $outcome, $props)
 
                                         foreach ($props["checkcontent"] as $key => $patterns) {
 
+                                            // echo "-> $key";
                                             $mode = "default";
 
                                             // Temporal hack
@@ -685,11 +686,12 @@ function processHistory($history, $elements, $wpapi, $outcome, $props)
                                             }
 
                                             $content = parseMediaWikiDiff($outcome["compare"]["*"], $mode);
+                                            // var_dump($content);
 
                                             $elements[$title][$user] = processCheckContent($elements[$title][$user], $content, $key, $patterns);
 
                                         }
-                                        //var_dump( $elements );
+                                        // var_dump($elements);
                                     }
 
                                 } else {
@@ -1214,9 +1216,10 @@ function checkContent($text, $patterns)
 
         $p = 0;
 
-
+        // echo "L: $line\n";
         foreach ($patterns as $pattern) {
 
+            // echo "P: $pattern\n";
             if ($p == 0) {
 
 
