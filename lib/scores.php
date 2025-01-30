@@ -1,7 +1,6 @@
 <?php
 
-use Addwiki\Mediawiki\Api\Client\Action\ActionApi;
-
+use Addwiki\Mediawiki\Api\Client\Action\Request\ActionRequest;
 function assignScores($count, $edits, $elements_counts, $wpapi, $props, $newpages = [], $oldpages = [])
 {
 
