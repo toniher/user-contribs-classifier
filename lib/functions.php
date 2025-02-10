@@ -792,10 +792,6 @@ function processHistory($history, $elements, $wpapi, $outcome, $props)
                             // Checking comment for /* Revisada */ o /* Validada */
                             if (array_key_exists("checkcomment", $props)) {
 
-                                if (! array_key_exists($user, $elements[$title])) {
-                                    $elements[$title][$user] = array();
-                                }
-
                                 foreach ($props["checkcomment"] as $key => $patterns) {
 
                                     $elements[$title][$user] = processCheckContent($elements[$title][$user], $comment, $key, $patterns);
