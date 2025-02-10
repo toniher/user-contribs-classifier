@@ -497,6 +497,139 @@ function checkDeletedRevid($wpapi, $revid)
 
 }
 
+function processRevision($wpapi, $revid, $props, $title, $user, $defkey)
+{
+
+    $out = array();
+
+    // https://ca.wikipedia.org/w/api.php?action=query&prop=revisions&revids=22894857&rvprop=content&rvslots=main
+    $params = array( "revids" => $revid, "prop" => "revisions", "rvprop" => "content", "rvslots" => "main" );
+    // $userContribRequest = new Mwapi\SimpleRequest('query', $params);
+    // $outcome = $wpapi->postRequest($userContribRequest);
+
+    $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
+
+    if ($outcome && array_key_exists("query", $outcome) && array_key_exists("pages", $outcome["query"])) {
+
+        $pagesQuery = array_keys($outcome["query"]["pages"]);
+
+        if (count($pagesQuery) > 0) {
+
+            $page = $pagesQuery[0];
+
+            if (array_key_exists("revisions", $outcome["query"]["pages"][$page])) {
+
+
+                $revs = $outcome["query"]["pages"][$page]["revisions"];
+
+                if (count($revs) > 0) {
+
+                    $revContent = $revs[0];
+
+                    if (array_key_exists("slots", $revContent)) {
+
+                        if (array_key_exists("main", $revContent["slots"])) {
+
+                            $content = $revContent["slots"]["main"]["*"];
+
+                            echo "?? GLOBAL\n";
+                            echo "$user\n";
+
+
+                            foreach ($props[$defkey] as $key => $patterns) {
+
+                                // $mode = "default";
+
+                                $out = processCheckContent($elements[$title][$user], $content, $key, $patterns);
+
+                            }
+                            //var_dump( $elements );
+
+                        }
+                    }
+
+                }
+
+            }
+
+        }
+
+    }
+    return $out;
+}
+
+
+// https://ca.wikipedia.org/w/api.php?action=compare&torelative=next&fromrev=22684935&prop=diff
+// Provide comparison
+function parseContent($wpapi, $elements, $props, $title, $user, $parentid, $revid)
+{
+    if ($parentid > 0) {
+
+        $params = array( "torev" => $revid, "fromrev" => $parentid, "prop" => "diff" );
+        // $userContribRequest = new Mwapi\SimpleRequest('compare', $params);
+
+        $outcome = null;
+
+        try {
+            // $outcome = $wpapi->postRequest($userContribRequest);
+
+            $outcome = $wpapi->action()->request(ActionRequest::simplePost('compare', $params));
+        } catch (Exception $e) {
+            echo $e->getMessage();
+            echo "IT COULD NOT COMPARE\n";
+            return $elements; // Return elements as it is
+        }
+
+        if ($outcome && array_key_exists("compare", $outcome) && array_key_exists("*", $outcome["compare"])) {
+
+            echo "?? GLOBAL\n";
+            echo "$user\n";
+
+            foreach ($props["checkcontent"] as $key => $patterns) {
+
+                // echo "-> $key";
+                $mode = "default";
+
+                // Temporal hack
+                if ($key === "efemèrides" || $key === "imatges") {
+                    $mode = "noins";
+                }
+
+                $content = parseMediaWikiDiff($outcome["compare"]["*"], $mode);
+                // var_dump($content);
+
+                $elements[$title][$user] = processCheckContent($elements[$title][$user], $content, $key, $patterns);
+
+            }
+            // var_dump($elements);
+        }
+
+    } else {
+        $elements[$title][$user] = processRevision($wpapi, $elements, $revid, $props, $title, $user, "checkcontent");
+    }
+
+    return $elements;
+
+}
+
+// Provide comparison from full revs
+function parseContentFull($wpapi, $elements, $props, $title, $user, $parentid, $revid)
+{
+    if ($parentid > 0) {
+
+        $pre = processRevision($wpapi, $elements, $parentid, $props, $title, $user, "checkcontentfull");
+        $post = processRevision($wpapi, $elements, $revid, $props, $title, $user, "checkcontentfull");
+        // TODO: Need to handle the difference here
+
+    } else {
+        $elements[$title][$user] = processRevision($wpapi, $elements, $revid, $props, "checkcontentfull");
+    }
+
+    return $elements;
+
+}
+
+
 
 function processHistory($history, $elements, $wpapi, $outcome, $props)
 {
@@ -641,120 +774,18 @@ function processHistory($history, $elements, $wpapi, $outcome, $props)
                             array_push($history[$title]["contribs"][$user], $size - $presize);
 
                             $presize = $size;
+                            // Let's save per user
+                            if (! array_key_exists($user, $elements[$title])) {
+                                $elements[$title][$user] = array();
+                            }
 
+                            // Handle with full content
+                            if (array_key_exists("checkcontentfull", $props)) {
+                                $elements = parseContentFull($wpapi, $elements, $props, $title, $user, $parentid, $revid);
+                            }
                             // Only if diff
                             if (array_key_exists("checkcontent", $props)) {
-
-                                // https://ca.wikipedia.org/w/api.php?action=compare&torelative=next&fromrev=22684935&prop=diff
-                                // Provide comparison
-
-                                if ($parentid > 0) {
-
-                                    $params = array( "torev" => $revid, "fromrev" => $parentid, "prop" => "diff" );
-                                    // $userContribRequest = new Mwapi\SimpleRequest('compare', $params);
-
-                                    $outcome = null;
-
-                                    try {
-                                        // $outcome = $wpapi->postRequest($userContribRequest);
-
-                                        $outcome = $wpapi->action()->request(ActionRequest::simplePost('compare', $params));
-                                    } catch (Exception $e) {
-                                        echo $e->getMessage();
-                                        echo "IT COULD NOT COMPARE\n";
-                                        continue;
-                                    }
-
-                                    if (! array_key_exists($user, $elements[$title])) {
-                                        $elements[$title][$user] = array();
-                                    }
-
-                                    if ($outcome && array_key_exists("compare", $outcome) && array_key_exists("*", $outcome["compare"])) {
-
-                                        echo "?? GLOBAL\n";
-                                        echo "$user\n";
-
-
-                                        foreach ($props["checkcontent"] as $key => $patterns) {
-
-                                            // echo "-> $key";
-                                            $mode = "default";
-
-                                            // Temporal hack
-                                            if ($key === "efemèrides" || $key === "imatges") {
-                                                $mode = "noins";
-                                            }
-
-                                            $content = parseMediaWikiDiff($outcome["compare"]["*"], $mode);
-                                            // var_dump($content);
-
-                                            $elements[$title][$user] = processCheckContent($elements[$title][$user], $content, $key, $patterns);
-
-                                        }
-                                        // var_dump($elements);
-                                    }
-
-                                } else {
-
-                                    // https://ca.wikipedia.org/w/api.php?action=query&prop=revisions&revids=22894857&rvprop=content&rvslots=main
-                                    $params = array( "revids" => $revid, "prop" => "revisions", "rvprop" => "content", "rvslots" => "main" );
-                                    // $userContribRequest = new Mwapi\SimpleRequest('query', $params);
-                                    // $outcome = $wpapi->postRequest($userContribRequest);
-
-                                    $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
-                                    if (! array_key_exists($user, $elements[$title])) {
-                                        $elements[$title][$user] = array();
-                                    }
-
-                                    if ($outcome && array_key_exists("query", $outcome) && array_key_exists("pages", $outcome["query"])) {
-
-                                        $pagesQuery = array_keys($outcome["query"]["pages"]);
-
-                                        if (count($pagesQuery) > 0) {
-
-                                            $page = $pagesQuery[0];
-
-                                            if (array_key_exists("revisions", $outcome["query"]["pages"][$page])) {
-
-
-                                                $revs = $outcome["query"]["pages"][$page]["revisions"];
-
-                                                if (count($revs) > 0) {
-
-                                                    $revContent = $revs[0];
-
-                                                    if (array_key_exists("slots", $revContent)) {
-
-                                                        if (array_key_exists("main", $revContent["slots"])) {
-
-                                                            $content = $revContent["slots"]["main"]["*"];
-
-                                                            echo "?? GLOBAL\n";
-                                                            echo "$user\n";
-
-
-                                                            foreach ($props["checkcontent"] as $key => $patterns) {
-
-                                                                $mode = "default";
-
-                                                                $elements[$title][$user] = processCheckContent($elements[$title][$user], $content, $key, $patterns);
-
-                                                            }
-                                                            //var_dump( $elements );
-
-                                                        }
-                                                    }
-
-                                                }
-
-                                            }
-
-                                        }
-
-                                    }
-
-
-                                }
+                                $elements = parseContent($wpapi, $elements, $props, $title, $user, $parentid, $revid);
 
                             }
 
