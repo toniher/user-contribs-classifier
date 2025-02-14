@@ -1,6 +1,7 @@
 <?php
 
 use Addwiki\Mediawiki\Api\Client\Action\Request\ActionRequest;
+
 function assignScores($count, $edits, $elements_counts, $wpapi, $props, $newpages = [], $oldpages = [])
 {
 
@@ -293,6 +294,10 @@ function printScores($scores, $mode = "wiki", $wpapi, $counts, $elements_counts,
     $elements = [];
     if (array_key_exists("checkcontent", $props)) {
         $elements = array_keys($props["checkcontent"]);
+    }
+
+    if (array_key_exists("checkcontentfull", $props)) {
+        $elements = array_keys($props["checkcontentfull"]);
     }
 
     if (array_key_exists("checkcomment", $props)) {

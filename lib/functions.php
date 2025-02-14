@@ -497,7 +497,7 @@ function checkDeletedRevid($wpapi, $revid)
 
 }
 
-function processRevision($wpapi, $revid, $props, $title, $user, $defkey)
+function processRevision($wpapi, $elements, $revid, $props, $title, $user, $defkey)
 {
 
     $out = array();
@@ -507,7 +507,7 @@ function processRevision($wpapi, $revid, $props, $title, $user, $defkey)
     // $userContribRequest = new Mwapi\SimpleRequest('query', $params);
     // $outcome = $wpapi->postRequest($userContribRequest);
 
-    $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
+    $outcome = $wpapi->action()->request(ActionRequest::simpleGet('query', $params));
 
     if ($outcome && array_key_exists("query", $outcome) && array_key_exists("pages", $outcome["query"])) {
 
@@ -617,12 +617,21 @@ function parseContentFull($wpapi, $elements, $props, $title, $user, $parentid, $
 {
     if ($parentid > 0) {
 
+        echo "$title - $user - $parentid - $revid\n";
         $pre = processRevision($wpapi, $elements, $parentid, $props, $title, $user, "checkcontentfull");
         $post = processRevision($wpapi, $elements, $revid, $props, $title, $user, "checkcontentfull");
-        // TODO: Need to handle the difference here
+        foreach (array_keys($post) as $key) {
+            if (array_key_exists($key, $pre)) {
+                if (! array_key_exists($key, $elements[$title][$user])) {
+                    $elements[$title][$user][$key] = 0;
+                }
+                $elements[$title][$user][$key] = $elements[$title][$user][$key] + ($post[$key] - $pre[$key]);
+            }
+        }
+
 
     } else {
-        $elements[$title][$user] = processRevision($wpapi, $elements, $revid, $props, "checkcontentfull");
+        $elements[$title][$user] = processRevision($wpapi, $elements, $revid, $props, $title, $user, "checkcontentfull");
     }
 
     return $elements;

@@ -6,7 +6,11 @@ require_once __DIR__ . '/vendor/autoload.php';
 
 use Addwiki\Mediawiki\Api\Client\Action\Request\ActionRequest;
 use Addwiki\Mediawiki\Api\Client\Auth\UserAndPassword;
+use Addwiki\Mediawiki\Api\Client\Action\ActionApi;
 use Addwiki\Mediawiki\Api\Client\MediaWiki;
+use Wikibase\Api as WbApi;
+use Mediawiki\DataModel as MwDM;
+use Wikibase\DataModel as WbDM;
 
 // Detect commandline args
 $conffile = 'config.json';
@@ -231,9 +235,7 @@ function redirectMerge($pages, $wpapi)
 
         $params = array( 'titles' => $titles, 'redirects' => true );
 
-        $redRequest = new Mwapi\SimpleRequest('query', $params);
-
-        $outcome = $wpapi->postRequest($redRequest);
+        $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
 
         if (array_key_exists("query", $outcome)) {
 
@@ -283,9 +285,7 @@ function retrieveWpQuery($pages, $wpapi, $params, $uccontinue, $props)
         $params["uccontinue"] = $uccontinue;
     }
 
-    $userContribRequest = new Mwapi\SimpleRequest('query', $params);
-
-    $outcome = $wpapi->postRequest($userContribRequest);
+    $outcome = $wpapi->action()->request(ActionRequest::simplePost('query', $params));
 
     $uccontinue = null;
 
@@ -530,9 +530,7 @@ function retrievePropsWd($queryResult, $qentries, $props, $wdapi)
     // Below for main WikiData ID
     $params = array( "ids" => $qentriesStr, "props" => "claims" );
 
-    $listEntities = new Mwapi\SimpleRequest('wbgetentities', $params);
-
-    $outcome = $wdapi->postRequest($listEntities);
+    $outcome = $wpapi->action()->request(ActionRequest::simplePost('wbgetentities', $params));
 
     $filter = null;
     $filterProps = array( );
