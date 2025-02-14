@@ -8,10 +8,11 @@ use Addwiki\Mediawiki\Api\Client\Action\Request\ActionRequest;
 use Addwiki\Mediawiki\Api\Client\Auth\UserAndPassword;
 use Addwiki\Mediawiki\Api\Client\Action\ActionApi;
 use Addwiki\Mediawiki\Api\Client\MediaWiki;
-use Wikibase\Api as WbApi;
-use Mediawiki\DataModel as MwDM;
-use Wikibase\DataModel as WbDM;
 
+// use Wikibase\Api as WbApi;
+// use Mediawiki\DataModel as MwDM;
+// use Wikibase\DataModel as WbDM;
+//
 // Detect commandline args
 $conffile = 'config.json';
 $userhandle = null;
