@@ -519,7 +519,6 @@ function processRevision($wpapi, $elements, $revid, $props, $title, $user, $defk
 
             if (array_key_exists("revisions", $outcome["query"]["pages"][$page])) {
 
-
                 $revs = $outcome["query"]["pages"][$page]["revisions"];
 
                 if (count($revs) > 0) {
@@ -530,21 +529,24 @@ function processRevision($wpapi, $elements, $revid, $props, $title, $user, $defk
 
                         if (array_key_exists("main", $revContent["slots"])) {
 
-                            $content = $revContent["slots"]["main"]["*"];
+                            if (array_key_exists("*", $revContent["slots"]["main"])) {
+                                $content = $revContent["slots"]["main"]["*"];
 
-                            echo "?? GLOBAL\n";
-                            echo "$user\n";
+                                echo "?? GLOBAL\n";
+                                echo "$user\n";
 
+                                if (! empty($content)) {
 
-                            foreach ($props[$defkey] as $key => $patterns) {
+                                    foreach ($props[$defkey] as $key => $patterns) {
 
-                                // $mode = "default";
+                                        // $mode = "default";
 
-                                $out = processCheckContent($elements[$title][$user], $content, $key, $patterns);
+                                        $out = processCheckContent($elements[$title][$user], $content, $key, $patterns);
 
+                                    }
+                                }
+                                //var_dump( $elements );
                             }
-                            //var_dump( $elements );
-
                         }
                     }
 
@@ -620,15 +622,18 @@ function parseContentFull($wpapi, $elements, $props, $title, $user, $parentid, $
         echo "$title - $user - $parentid - $revid\n";
         $pre = processRevision($wpapi, $elements, $parentid, $props, $title, $user, "checkcontentfull");
         $post = processRevision($wpapi, $elements, $revid, $props, $title, $user, "checkcontentfull");
+        $diff = 0;
         foreach (array_keys($post) as $key) {
             if (array_key_exists($key, $pre)) {
                 if (! array_key_exists($key, $elements[$title][$user])) {
                     $elements[$title][$user][$key] = 0;
                 }
-                $elements[$title][$user][$key] = $elements[$title][$user][$key] + ($post[$key] - $pre[$key]);
+                $diff = $post[$key] - $pre[$key];
+                $elements[$title][$user][$key] = $elements[$title][$user][$key] + $diff;
             }
         }
 
+        echo "DIFF - $diff\n";
 
     } else {
         $elements[$title][$user] = processRevision($wpapi, $elements, $revid, $props, $title, $user, "checkcontentfull");
@@ -834,6 +839,9 @@ function processPages($pages, $contribs, $props)
             $title = strval($contrib["title"]);
             // echo $title, "\n";
 
+            if (! array_key_exists("user", $contrib)) {
+                continue;
+            }
             $user = strval($contrib["user"]);
 
             if (array_key_exists("comment", $contrib)) {
