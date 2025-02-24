@@ -14,6 +14,7 @@ Tools for retrieving reports of users contributions
 
 * Document all options
 * Counting type of contributions (how many images, references, etc.)
+* Count using HTML for references, for instance
 * Script for parsing CSV
 * Lumen application
 
